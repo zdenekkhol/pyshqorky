@@ -1,6 +1,7 @@
 import pygame
 import pygame_gui
 from players import *
+from board import *
 
 """
 class Game
@@ -77,4 +78,6 @@ class Game:
             pygame.display.update()
     
     def run(self):
+        #vytvoříme Board
+        board = Board(self)
         pass
