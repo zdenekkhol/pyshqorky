@@ -4,7 +4,7 @@ class Player
 - name
 - color
 - type
-* oponent
+* oponent_id
 """
 
 class Player:
@@ -17,5 +17,5 @@ class Player:
         self.color = color
         self.player_type = player_type
 
-    def oponent(self):
+    def oponent_id(self):
         return -self.id
