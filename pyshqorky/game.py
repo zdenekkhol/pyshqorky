@@ -1,5 +1,7 @@
 import pygame
 import pygame_gui
+from players import *
+
 """
 class Game
 - running
@@ -15,19 +17,21 @@ class Game:
     MODE_MENU_SETTINGS = 2
     MODE_MENU_GAME = 3
 
+    mode = MODE_MENU_MAIN
+    FPS = 30 # maximální počet FPS
+
     def __init__(self):
-        self.mode = Game.MODE_MENU_MAIN
+        #self.mode = Game.MODE_MENU_MAIN
         pygame.init()
         pygame.display.set_caption("Pyshqorky")
         self.display = pygame.display.set_mode((800, 600))
         self.screen = pygame.Surface((800, 600))
-        #self.screen.fill(pygame.Color('#000000'))
+        self.screen.fill(pygame.Color('#000000'))
         self.manager = pygame_gui.UIManager((800, 600))
         self.clock = pygame.time.Clock()
-        self.FPS = 30 # maximální počet FPS
 
         #self.board = Board()
-        #self.players = [Player(1, "Player 1", (255,0,0), Player.TYPE_HUMAN), Player(-1, "Player 2", (0,0,255), Player.TYPE_AI)]
+        self.players = Players({Players.PLAYER_1: Player(Players.PLAYER_1, "Player 1", (255,0,0), Player.TYPE_HUMAN), Players.PLAYER_2: Player(Players.PLAYER_2, "Player 2", (0,0,255), Player.TYPE_AI)})
         #self.active_player = 0
 
     def main(self):
