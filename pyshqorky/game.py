@@ -6,5 +6,10 @@ class Game
 * main
 """
 class Game:
-    def __init__():
+    def __init__(self):
+        pass
+
+    def run(self):
+        # vstupní bod po spuštění hry
+        
         pass
