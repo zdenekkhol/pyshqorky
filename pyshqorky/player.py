@@ -11,11 +11,20 @@ class Player:
     TYPE_HUMAN = 1
     TYPE_AI = 2
     
-    def __init__(self, id, name, color, player_type = TYPE_HUMAN):
-        self.id = id
+    def __init__(self, id: int, name: str, color: tuple, type: int = TYPE_HUMAN):
+        self._id = id
         self.name = name
         self.color = color
-        self.player_type = player_type
+        self.type = type
 
-    def oponent_id(self):
+    @property
+    def id(self) -> int:
+        return self._id
+
+    @property
+    def oponent_id(self) -> int:
         return -self.id
+    
+
+    
+

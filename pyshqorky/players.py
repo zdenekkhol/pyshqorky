@@ -1,4 +1,4 @@
-from player import *
+from pyshqorky.player import *
 
 """
 class Players (list)
@@ -12,13 +12,20 @@ class Players(dict[int, Player]):
     PLAYER_1 = 1
     PLAYER_2 = -1
 
-    actint = 1
+    def __init__(self, dict: dict[int, Player]):
+        self.reset()
+        super().__init__(dict)
 
-    def active(self):
-        return self.items[self.actint]
+    @property
+    def active(self) -> Player:
+        return self.__getitem__(self._active_id)
     
-    def nonactive(self):
-        return self.item[-self.actint]
+    @property
+    def oponent(self) -> Player:
+        return self.__getitem__(-self._active_id)
     
-    def switch_active(self):
-        self.actint = -self.actint
+    def next(self) -> None:
+        self._active_id = -self._active_id
+
+    def reset(self) -> None:
+        self._active_id = self.PLAYER_1
