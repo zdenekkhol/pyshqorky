@@ -81,10 +81,12 @@ class Board:
             # pokud jsme tu sami
             else:
                 # tak přičteme hodnotu odpovídající počtu našich značek
-                score += Board.SCORE_PLAYER[window.count(player.id)]
+                #score += Board.SCORE_PLAYER[window.count(player.id)]
+                score += Player.AI_VALUES[player.ai_level][Player.AI_SCORE_MY][window.count(player.id)]
         else:
             # je tu pouze protivník, takže odečteme hodnotu odpovídající počtu jeho značek
-            score -= Board.SCORE_OPONENT[window.count(player.oponent_id)]
+            #score -= Board.SCORE_OPONENT[window.count(player.oponent_id)]
+            score -= Player.AI_VALUES[player.ai_level][Player.AI_SCORE_OPONENT][window.count(player.oponent_id)]
 
         return score
 
@@ -151,7 +153,7 @@ class Board:
 
     def win_tie(self, player: Player) -> int:
         """
-        Zde projedeme celý board a z pohledu hráče zhodnotíme, jestli jsme vyhráli nebo prohráli, jestli je remíza nebo hrajemé dál.
+        Zde projedeme celý board a z pohledu hráče zhodnotíme, jestli jsme vyhráli nebo prohráli, jestli je remíza nebo hrajeme dál.
         Technicky je to provedeno tak, že projedeme všechna okna 1 x 5, co jsou na desce a zhodnotíme je ve vlastní funkci win_tie_wnd5.
         Podle toho odsud vracíme hodnoty dál.
         :param player: Z pohledu jakého hráče hodnotíme?
@@ -221,7 +223,6 @@ class Board:
                         best_score = score
                     elif (score == best_score):
                         avail_moves.append((r,c))
-
         return random.choice(avail_moves)
 
     def make_move(self, player: Player, coord: tuple):

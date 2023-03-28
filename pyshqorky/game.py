@@ -32,8 +32,8 @@ class Game:
 
         self.board = Board(15, 15, 525, 525, 235, 35)
         self.players = Players({
-            Players.PLAYER_1: Player(id = Players.PLAYER_1, name = "Human", color = (255, 64, 64), shape = Player.SHAPE_SQUARE, type = Player.TYPE_HUMAN), 
-            Players.PLAYER_2: Player(id = Players.PLAYER_2, name = "Computer", color = (64, 64, 255), shape = Player.SHAPE_CIRCLE, type = Player.TYPE_AI)})
+            Players.PLAYER_1: Player(id=Players.PLAYER_1, name="Human", color=(255, 64, 64), shape=Player.SHAPE_SQUARE, type=Player.TYPE_HUMAN, ai_level=Player.AI_LVL_BALANCED), 
+            Players.PLAYER_2: Player(id=Players.PLAYER_2, name="Computer", color=(64, 64, 255), shape=Player.SHAPE_CIRCLE, type=Player.TYPE_AI, ai_level=Player.AI_LVL_BALANCED)})
 
         if Players.load() == None:
             self.players.save()
@@ -153,6 +153,10 @@ class Game:
         dd_shape1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+120), (150, 40)), options_list=Player.shape_list, #type: ignore
                                                       starting_option=Player.shape_list[self.players.get(Players.PLAYER_1).shape], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={'right': 'right'})
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+160), (100, 40)), text='AI Level:', manager=self.manager, container=ui_settings, anchors={'left': 'left'})
+        dd_ailevel1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+160), (150, 40)), options_list=Player.ai_level_list, #type: ignore
+                                                      starting_option=Player.ai_level_list[self.players.get(Players.PLAYER_1).ai_level], #type: ignore
+                                                      manager=self.manager, container=ui_settings, anchors={'right': 'right'})
 
         pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+0), (100, 50)), text='Player 2', manager=self.manager, container=ui_settings, anchors={'centerx': 'centerx'})
         pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+40), (100, 40)), text='Name:', manager=self.manager, container=ui_settings, anchors={'left': 'left'})
@@ -163,8 +167,12 @@ class Game:
                                                       starting_option=Player.type_list[self.players.get(Players.PLAYER_2).type], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={'right': 'right'})
         pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+120), (100, 40)), text='Shape:', manager=self.manager, container=ui_settings, anchors={'left': 'left'})
-        dd_shape2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+120), (120, 40)), options_list=Player.shape_list, #type: ignore
+        dd_shape2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+120), (150, 40)), options_list=Player.shape_list, #type: ignore
                                                       starting_option=Player.shape_list[self.players.get(Players.PLAYER_2).shape], #type: ignore
+                                                      manager=self.manager, container=ui_settings, anchors={'right': 'right'})
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+160), (100, 40)), text='AI Level:', manager=self.manager, container=ui_settings, anchors={'left': 'left'})
+        dd_ailevel2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+160), (150, 40)), options_list=Player.ai_level_list, #type: ignore
+                                                      starting_option=Player.ai_level_list[self.players.get(Players.PLAYER_2).ai_level], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={'right': 'right'})
 
 
@@ -181,10 +189,12 @@ class Game:
                         print('Save!')
                         self.players.get(Players.PLAYER_1).name = tb_name1.text # type: ignore
                         self.players.get(Players.PLAYER_2).name = tb_name2.text # type: ignore
-                        self.players.get(Players.PLAYER_1).type = Player.type_list.index(dd_type1.selected_option) # type: ignore
-                        self.players.get(Players.PLAYER_2).type = Player.type_list.index(dd_type2.selected_option) # type: ignore
                         self.players.get(Players.PLAYER_1).shape = Player.shape_list.index(dd_shape1.selected_option) # type: ignore
                         self.players.get(Players.PLAYER_2).shape = Player.shape_list.index(dd_shape2.selected_option) # type: ignore
+                        self.players.get(Players.PLAYER_1).type = Player.type_list.index(dd_type1.selected_option) # type: ignore
+                        self.players.get(Players.PLAYER_2).type = Player.type_list.index(dd_type2.selected_option) # type: ignore
+                        self.players.get(Players.PLAYER_1).ai_level = Player.ai_level_list.index(dd_ailevel1.selected_option) # type: ignore
+                        self.players.get(Players.PLAYER_2).ai_level = Player.ai_level_list.index(dd_ailevel2.selected_option) # type: ignore
                         self.players.save()
                         self.mode = prev_mode
                 if event.type == pygame_gui.UI_TEXT_ENTRY_CHANGED:
