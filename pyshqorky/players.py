@@ -1,3 +1,5 @@
+from __future__ import annotations
+import pickle
 from pyshqorky.player import *
 
 """
@@ -29,3 +31,18 @@ class Players(dict[int, Player]):
 
     def reset(self) -> None:
         self._active_id = self.PLAYER_1
+
+    def save(self, filename: str = ".savegame") -> None:
+        pf = open(filename, "wb")
+        pickle.dump(self, pf)
+        pf.close()
+
+    @staticmethod
+    def load(filename: str = ".savegame") -> Players:
+        try:
+            pf = open(filename, "rb")
+            loaded = pickle.load(pf)
+            return loaded
+        except FileNotFoundError:
+            return None # type: ignore
+                

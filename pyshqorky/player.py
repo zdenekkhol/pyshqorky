@@ -8,13 +8,20 @@ class Player
 """
 
 class Player:
-    TYPE_HUMAN = 1
-    TYPE_AI = 2
+    TYPE_HUMAN = 0
+    TYPE_AI = 1
+    SHAPE_SQUARE = 0
+    SHAPE_CIRCLE = 1
+    SHAPE_SYMBOL = 2
     
-    def __init__(self, id: int, name: str, color: tuple, type: int = TYPE_HUMAN):
+    type_list = ("Human", "AI")
+    shape_list = ("Square", "Circle", "Symbol")
+    
+    def __init__(self, id: int, name: str, color: tuple, shape: int = SHAPE_SQUARE, type: int = TYPE_HUMAN):
         self._id = id
         self.name = name
         self.color = color
+        self.shape = shape
         self.type = type
 
     @property
