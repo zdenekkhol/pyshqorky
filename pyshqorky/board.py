@@ -15,8 +15,19 @@ class Board
 """
 
 class Board:
-    SCORE_PLAYER = [0, 10, 100, 1000, 5000, 100000]
-    SCORE_OPONENT = [0, 15, 150, 1500, 7500, 150000]
+    # agressive
+    SCORE_PLAYER = [0, 10, 100, 1000, 10000, 100000]
+    SCORE_OPONENT = [0, 20, 200, 2000, 20000, 200000]
+    # balanced
+    SCORE_PLAYER = [0, 10, 100, 1000, 10000, 100000]
+    SCORE_OPONENT = [0, 50, 500, 5000, 50000, 500000]
+    # defensive
+    SCORE_PLAYER = [0, 10, 100, 1000, 10000, 100000]
+    SCORE_OPONENT = [0, 100, 1000, 10000, 100000, 1000000]
+    # ultra defensive
+    SCORE_PLAYER = [0, 10, 100, 1000, 2000, 100000]
+    SCORE_OPONENT = [0, 100, 1000, 10000, 20000, 1000000]
+
     EMPTY = 0
     WT_NONE = 0
     WT_WINNER = 1
@@ -38,11 +49,23 @@ class Board:
         # vykreslení herní plochy
         for r in range (self.rows):
             for c in range(self.cols):
-                self.btns[r][c] = pygame.draw.rect(screen, (0x40,0x40,0x40), pygame.Rect(self.sqsize*r+self.x_offset, self.sqsize*c+self.y_offset, self.sqsize-1, self.sqsize-1))
+                self.btns[r][c] = pygame.draw.rect(screen, (0x40,0x40,0x40), pygame.Rect(self.sqsize*r+self.x_offset, self.sqsize*c+self.y_offset, self.sqsize-1, self.sqsize-1)) # type: ignore
                 if players is not None:
                     for id, pl in players.items():
                         if self.grid[r][c] == pl.id:
-                            pygame.draw.rect(screen, pl.color, pygame.Rect(self.sqsize*r+self.x_offset+2, self.sqsize*c+self.y_offset+2, self.sqsize-5, self.sqsize-5))
+                            match pl.shape:
+                                case Player.SHAPE_SQUARE:
+                                    pygame.draw.rect(screen, pl.color, pygame.Rect(self.sqsize*r+self.x_offset+(self.sqsize/8),
+                                                                                    self.sqsize*c+self.y_offset+(self.sqsize/8),
+                                                                                    self.sqsize-(self.sqsize/4),
+                                                                                    self.sqsize-(self.sqsize/4)))
+                                case Player.SHAPE_CIRCLE:
+                                    pygame.draw.circle(screen, pl.color, (self.sqsize*r+self.x_offset+(self.sqsize/2),
+                                                                        self.sqsize*c+self.y_offset+(self.sqsize/2)),
+                                                                        self.sqsize*0.45)
+                                case Player.SHAPE_SYMBOL:
+
+                                    pass
 
     def score_wnd5(self, window: list, player: Player):
         score = 0
