@@ -58,13 +58,19 @@ class Board:
         # vykreslení herní plochy
         for r in range (self.rows):
             for c in range(self.cols):
+                # Vykreslení jednoho herního pole
                 self.btns[r][c] = pygame.draw.rect(screen, (0x40,0x40,0x40), pygame.Rect(self.sqsize*r+self.x_offset, # type: ignore
                                                                                          self.sqsize*c+self.y_offset,
                                                                                          self.sqsize-1, self.sqsize-1))
+                # Pokud jsme dostali i seznam hráčů
                 if players is not None:
+                    # projedem oba
                     for id, pl in players.items():
+                        # a pokud je tenhle na tomto poli
                         if self.grid[r][c] == pl.id:
+                            # podíváme se, jaký má nastaven tvar kamene
                             match pl.shape:
+                                # a ten mu tam nakreslíme
                                 case Player.SHAPE_SQUARE:
                                     pygame.draw.rect(screen, pl.color, pygame.Rect(self.sqsize*r+self.x_offset+(self.sqsize/8),
                                                                                     self.sqsize*c+self.y_offset+(self.sqsize/8),
@@ -144,7 +150,7 @@ class Board:
     # WT_TIE, pokud v této pětici nejde dosáhnout vítězství
     def win_tie_wnd5(self, window: list, player: Player) -> int:
         """
-        Zde hodnotíme z pohledu výhra / prohra /remíza výsek z boardu o velikosti 1 x 5.
+        Zde hodnotíme z pohledu hráče výsek z boardu o velikosti 1 x 5 na možnou výhru, prohru nebo remízu.
         Pokud je tam pouze player, vyhrál. Pokud je tam pouze oponent, player prohrál.
         Pokud jsou tam oba, tak zde již nikdo pětku neudělá.
         Pokud neplatí nic z toho, je možné hrát dál.
@@ -227,27 +233,47 @@ class Board:
         return tie
 
     def best_move(self, player: Player) -> tuple:
+        """
+        Najdeme, který tah hráče z možných bude ohodnocen nejvyšším skóre. Všechny s tímto skóre si dáme do seznamu a z něho jeden náhodně vybereme.
+        """
+        # možné tahy
         avail_moves = []
-        # spočítáme ohodnocení každého možného tahu a potom se rozhodneme
+        # na začátek je nejlepší skóre dostatečně malé, třeba mínus nekonečno
         best_score = -math.inf
+        # projedeme všechny pole na hrací desce
         for r in range(self.rows):
             for c in range(self.cols):
+                # pokud je prázdné
                 if self.grid[r][c] == Board.CELL_EMPTY:
+                    # tak si ho pro teď obsadíme
                     self.grid[r][c] = player.id
+                    # a spočítáme jeho skóre
                     score = self.score_board(player)
+                    # pole vrátíme zase zpět na prázdné
                     self.grid[r][c] = Board.CELL_EMPTY
+                    # pokud je skóre vyšši než předchozí nejvyšší
                     if (score > best_score):
+                        # vynulujeme seznam s možnými předchozími tahy
                         avail_moves = []
+                        # a přidáme tam tento
                         avail_moves.append((r,c))
+                        # nejlepší skóre je tedy toto naše nové
                         best_score = score
+                    # jinak, pokud je zjištěné skóre shodné s nejvyššim
                     elif (score == best_score):
+                        # tak přidáme tento tah mezi nejlepší
                         avail_moves.append((r,c))
+        # vrátíme náhodně vybraný tah z těch nejlepších
         return random.choice(avail_moves)
 
-    def make_move(self, player: Player, coord: tuple):
+    def make_move(self, player: Player, coord: tuple) -> None:
+        """
+        Položíme značku hráče `pyshqorky.player.Player` na pole o souřadnicích coord.
+        """
         self.grid[coord[0]][coord[1]] = player.id
 
-    def reset(self):
+    def reset(self) -> None:
+        """
+        Inicializujeme hrací desku - odebereme všechny značky hráčů.
+        """
         self.grid = [[0 for col in range(self.cols)] for row in range(self.rows)]
-        self.btns = [[pygame.Rect for col in range(self.cols)] for row in range(self.rows)]
-        pass
