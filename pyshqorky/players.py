@@ -1,7 +1,3 @@
-from __future__ import annotations
-import pickle
-from pyshqorky.player import *
-
 """
 class Players (list)
 - actint
@@ -9,6 +5,11 @@ class Players (list)
 * active
 * nonactive
 """
+
+from __future__ import annotations
+import pickle
+from pyshqorky.player import *
+
 
 class Players(dict[int, Player]):
     PLAYER_1 = 1
