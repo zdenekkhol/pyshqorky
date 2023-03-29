@@ -115,6 +115,7 @@ class Board:
         """
         Projedeme na hrací desce všechna pole 1x5. Pro každé takové pole voláme `pyshqorky.board.Board.score_wnd5`.
         Nasčítáme všechna skóre, která se nám vrátila a vracíme to jako ohodnocení celé desky.
+        Inspirace zde: http://blog.trixi.cz/2013/02/popis-piskvorkoveho-algoritmu/
         """
         score = 0
 
