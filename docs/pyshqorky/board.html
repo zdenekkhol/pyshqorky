@@ -1,0 +1,972 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1" />
+<meta name="generator" content="pdoc 0.10.0" />
+<title>pyshqorky.board API documentation</title>
+<meta name="description" content="Původní návrh:
+class Board
+- grid
+* reset
+* draw
+* score - z pohledu hráče
+* score_wnd5
+* wintie - globálně, 0 = jedeme dál, 1/-1 win hráč, jinak = …" />
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/sanitize.min.css" integrity="sha256-PK9q560IAAa6WVRRh76LtCaI8pjTJ2z11v0miyNNjrs=" crossorigin>
+<link rel="preload stylesheet" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/11.0.1/typography.min.css" integrity="sha256-7l/o7C8jubJiy74VsKTidCy1yBkRtiUGbVkYBylBqUg=" crossorigin>
+<link rel="stylesheet preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/styles/github.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:30px;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:1em 0 .50em 0}h3{font-size:1.4em;margin:25px 0 10px 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .3s ease-in-out}a:hover{color:#e82}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900}pre code{background:#f8f8f8;font-size:.8em;line-height:1.4em}code{background:#f2f2f1;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{background:#f8f8f8;border:0;border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0;padding:1ex}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-weight:bold;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em .5em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.item .name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul{padding-left:1.5em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.1.1/highlight.min.js" integrity="sha256-Uv3H6lx7dJmRfRvH8TH6kJD1TSK1aFcwgx+mdg3epi8=" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => hljs.initHighlighting())</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>pyshqorky.board</code></h1>
+</header>
+<section id="section-intro">
+<p>Původní návrh:
+class Board
+- grid
+* reset
+* draw
+* score - z pohledu hráče
+* score_wnd5
+* wintie - globálně, 0 = jedeme dál, 1/-1 win hráč, jinak = tie
+* wintie_wnd5</p>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">&#34;&#34;&#34;
+Původní návrh:
+class Board
+- grid
+* reset
+* draw
+* score - z pohledu hráče
+* score_wnd5
+* wintie - globálně, 0 = jedeme dál, 1/-1 win hráč, jinak = tie
+* wintie_wnd5
+&#34;&#34;&#34;
+
+import pygame
+import random
+import math
+from pyshqorky.players import *
+
+class Board:
+    &#34;&#34;&#34; Třída pro práci s herní deskou. Jsou zde informace o rozmístění kamenů na desce, vyhodnocení stavu desky a její vykreslování.&#34;&#34;&#34;
+
+    #: Obsah prázdného pole na desce.
+    CELL_EMPTY = 0
+
+    #: Vítězství nebo remíza? Nic, nejde určit.
+    WT_NONE = 0
+    #: Vítězství nebo remíza? Jsem vítěz.
+    WT_WINNER = 1
+    #: Vítězství nebo remíza? Nejsem vítěz.
+    WT_LOSER = 2
+    #: Vítězství nebo remíza? Je to remíza.
+    WT_TIE = 3
+
+    def __init__(self, rows, cols, width, height, x_offset, y_offset) -&gt; None:
+        #: Počet řádků.
+        self.rows = rows
+        #: Počet sloupců.
+        self.cols = cols
+        #: Velikost na ose x v px.
+        self.width = width
+        #: Velikost na ose y v px.
+        self.height = height
+        #: Velikost strany jednoho hracího pole.
+        self.sqsize = width // cols
+        #: Posun na ose x, kam se bude deska vykreslovat.
+        self.x_offset = x_offset
+        #: Posun na ose y, kam se bude deska vykreslovat.
+        self.y_offset = y_offset
+        #: Seznam seznamů (2D pole), kde je umístění kamenů na desce.
+        self.grid = [[0 for col in range(self.cols)] for row in range(self.rows)]
+        #: Seznam seznamů (2D pole), kde je info o hracích polích, které použijeme pro vyhodnocení interakce s hráčem.
+        self.btns = [[pygame.Rect for col in range(self.cols)] for row in range(self.rows)]
+
+    def draw(self, screen, players: Players = None) -&gt; None: # type: ignore
+        &#34;&#34;&#34;
+        Vykreslení herní plochy. Nejdřív nakreslíme pole `pygame.Rect`. Každý v poli o velikosti o jedna menší, než velikost `pyshqorky.board.Board.sqsize`. To pro zobrazení mřížky.
+        Potom, pokud jsme dostali v parametru i seznam hráčů, nakreslíme jejich kameny na každé pole, kde se nacházejí.
+        &#34;&#34;&#34;
+        # vykreslení herní plochy
+        for r in range (self.rows):
+            for c in range(self.cols):
+                self.btns[r][c] = pygame.draw.rect(screen, (0x40,0x40,0x40), pygame.Rect(self.sqsize*r+self.x_offset, # type: ignore
+                                                                                         self.sqsize*c+self.y_offset,
+                                                                                         self.sqsize-1, self.sqsize-1))
+                if players is not None:
+                    for id, pl in players.items():
+                        if self.grid[r][c] == pl.id:
+                            match pl.shape:
+                                case Player.SHAPE_SQUARE:
+                                    pygame.draw.rect(screen, pl.color, pygame.Rect(self.sqsize*r+self.x_offset+(self.sqsize/8),
+                                                                                    self.sqsize*c+self.y_offset+(self.sqsize/8),
+                                                                                    self.sqsize-(self.sqsize/4),
+                                                                                    self.sqsize-(self.sqsize/4)))
+                                case Player.SHAPE_CIRCLE:
+                                    pygame.draw.circle(screen, pl.color, (self.sqsize*r+self.x_offset+(self.sqsize/2),
+                                                                        self.sqsize*c+self.y_offset+(self.sqsize/2)),
+                                                                        self.sqsize*0.45)
+                                case Player.SHAPE_SYMBOL:
+                                    #ToDo
+                                    pass
+
+    def score_wnd5(self, window: list, player: Player) -&gt; int:
+        &#34;&#34;&#34;
+        Ohodnocení výseku 1x5 z hrací desky z pohledu hráče (počítačového). Jestliže je tu prázdno nebo jsou tu oba protivníci, skóre je nula.
+        Jestli je tu hráč sám, skóre se přičítá a pokud pouze protihráč, skóre se odečítá.
+        Kolik se toho přičte nebo odečte, záleží na úrovni hry počítače, jestli jsou to kameny hráče nebo protivníka a počtu kamenů v této pětici.
+        Hodnota se vezme ze slovníku `pyshqorky.player.Player.AI_VALUES`
+        &#34;&#34;&#34;
+        score = 0
+
+        # jestliže je tu prázdno
+        if window.count(Board.CELL_EMPTY) == 5:
+            return 0
+        # jestliže v této pětici jsme
+        if window.count(player.id) != 0:
+            # a nejsme tu sami
+            if window.count(player.oponent_id) != 0:
+                return 0
+            # pokud jsme tu sami
+            else:
+                # tak přičteme hodnotu odpovídající počtu našich značek
+                score += Player.AI_VALUES[player.ai_level][Player.AI_SCORE_MY][window.count(player.id)]
+        else:
+            # je tu pouze protivník, takže odečteme hodnotu odpovídající počtu jeho značek
+            score -= Player.AI_VALUES[player.ai_level][Player.AI_SCORE_OPONENT][window.count(player.oponent_id)]
+
+        return score
+
+    def score_board(self, player: Player) -&gt; int:
+        &#34;&#34;&#34;
+        Projedeme na hrací desce všechna pole 1x5. Pro každé takové pole voláme `pyshqorky.board.Board.score_wnd5`.
+        Nasčítáme všechna skóre, která se nám vrátila a vracíme to jako ohodnocení celé desky.
+        &#34;&#34;&#34;
+        score = 0
+
+        # ohodnocení řádků
+        for r in range(self.rows):
+            row_array = [int(i) for i in list(self.grid[r][:])]
+            for c in range(self.cols-4):
+                window = row_array[c:c+5]
+                score += self.score_wnd5(window, player)
+
+        # ohodnocení sloupců
+        for c in range(self.cols):
+            col_array = [i[:][c] for i in self.grid]
+            for r in range(self.rows-4):
+                window = col_array[r:r+5]
+                score += self.score_wnd5(window, player)
+
+        # ohodnocení diagonál (\ i /)
+        for r in range(self.rows-4):
+            for c in range(self.cols-4):
+                # to je \
+                window = [self.grid[r+i][c+i] for i in range(5)]
+                score += self.score_wnd5(window, player)
+                # a tohle /
+                window = [self.grid[r+4-i][c+i] for i in range(5)]
+                score += self.score_wnd5(window, player)
+
+        return score
+
+    # vracíme WT_NONE, když je možné hrát dál
+    # WT_WINNER, pokud je vítězem player
+    # WT_LOSER, pokud je vítězem oponent
+    # WT_TIE, pokud v této pětici nejde dosáhnout vítězství
+    def win_tie_wnd5(self, window: list, player: Player) -&gt; int:
+        &#34;&#34;&#34;
+        Zde hodnotíme z pohledu výhra / prohra /remíza výsek z boardu o velikosti 1 x 5.
+        Pokud je tam pouze player, vyhrál. Pokud je tam pouze oponent, player prohrál.
+        Pokud jsou tam oba, tak zde již nikdo pětku neudělá.
+        Pokud neplatí nic z toho, je možné hrát dál.
+        :param window: Výsek z boardu 1 x 5.
+        :type window: list
+        :param player: Hodnotíme z pohledu tohoto hráče
+        :type player: Player
+        :return: Vrací možné hodnoty WT_WINNER, pokud player zvítězil, WT_LOSER pokud prohrál, WT_TIE pokud zde již není možné vyhrát nebo WT_NONE, pokud je možné zde ještě vyhrát.
+        :rtype: int
+        &#34;&#34;&#34;
+        # jestliže máme pět
+        if window.count(player.id) == 5:
+            return self.WT_WINNER
+
+        # jestli má pět oponent
+        if window.count(player.oponent_id) == 5:
+            return self.WT_LOSER
+        
+        # zde již není možné vyhrát
+        if window.count(player.id) != 0 and window.count(player.oponent_id) != 0:
+            return self.WT_TIE
+        
+        # jinak je možné pořád hrát dál
+        return self.WT_NONE
+
+    def win_tie(self, player: Player) -&gt; int:
+        &#34;&#34;&#34;
+        Zde projedeme celý board a z pohledu hráče zhodnotíme, jestli jsme vyhráli nebo prohráli, jestli je remíza nebo hrajeme dál.
+        Technicky je to provedeno tak, že projedeme všechna okna 1 x 5, co jsou na desce a zhodnotíme je ve vlastní funkci win_tie_wnd5.
+        Podle toho odsud vracíme hodnoty dál.
+        :param player: Hodnotíme z pohledu tohoto hráče
+        :type player: Player
+        :return: Vrací možné hodnoty WT_WINNER, pokud player zvítězil, WT_LOSER pokud prohrál, WT_TIE pokud je remíza nebo WT_NONE, pokud je možné hrát dál.
+        :rtype: int
+        &#34;&#34;&#34;
+        wt5 = None
+        tie = self.WT_TIE
+
+        # ohodnocení řádků
+        for r in range(self.rows):
+            row_array = [int(i) for i in list(self.grid[r][:])]
+            for c in range(self.cols-4):
+                window = row_array[c:c+5]
+                wt5 = self.win_tie_wnd5(window, player)
+                if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
+                    return wt5
+                elif wt5 == self.WT_NONE:
+                    tie = wt5
+
+        # ohodnocení sloupců
+        for c in range(self.cols):
+            col_array = [i[:][c] for i in self.grid]
+            for r in range(self.rows-4):
+                window = col_array[r:r+5]
+                wt5 = self.win_tie_wnd5(window, player)
+                if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
+                    return wt5
+                elif wt5 == self.WT_NONE:
+                    tie = wt5
+
+        # ohodnocení diagonál (\ i /)
+        for r in range(self.rows-4):
+            for c in range(self.cols-4):
+                # to je \
+                window = [self.grid[r+i][c+i] for i in range(5)]
+                wt5 = self.win_tie_wnd5(window, player)
+                if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
+                    return wt5
+                elif wt5 == self.WT_NONE:
+                    tie = wt5
+                # a tohle /
+                window = [self.grid[r+4-i][c+i] for i in range(5)]
+                wt5 = self.win_tie_wnd5(window, player)
+                if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
+                    return wt5
+                elif wt5 == self.WT_NONE:
+                    tie = wt5
+        
+        # nikdo ještě nevyhrál, tak vracíme, jestli byla remíza nebo ne
+        return tie
+
+    def best_move(self, player: Player) -&gt; tuple:
+        avail_moves = []
+        # spočítáme ohodnocení každého možného tahu a potom se rozhodneme
+        best_score = -math.inf
+        for r in range(self.rows):
+            for c in range(self.cols):
+                if self.grid[r][c] == Board.CELL_EMPTY:
+                    self.grid[r][c] = player.id
+                    score = self.score_board(player)
+                    self.grid[r][c] = Board.CELL_EMPTY
+                    if (score &gt; best_score):
+                        avail_moves = []
+                        avail_moves.append((r,c))
+                        best_score = score
+                    elif (score == best_score):
+                        avail_moves.append((r,c))
+        return random.choice(avail_moves)
+
+    def make_move(self, player: Player, coord: tuple):
+        self.grid[coord[0]][coord[1]] = player.id
+
+    def reset(self):
+        self.grid = [[0 for col in range(self.cols)] for row in range(self.rows)]
+        self.btns = [[pygame.Rect for col in range(self.cols)] for row in range(self.rows)]
+        pass</code></pre>
+</details>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="pyshqorky.board.Board"><code class="flex name class">
+<span>class <span class="ident">Board</span></span>
+<span>(</span><span>rows, cols, width, height, x_offset, y_offset)</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Třída pro práci s herní deskou. Jsou zde informace o rozmístění kamenů na desce, vyhodnocení stavu desky a její vykreslování.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Board:
+    &#34;&#34;&#34; Třída pro práci s herní deskou. Jsou zde informace o rozmístění kamenů na desce, vyhodnocení stavu desky a její vykreslování.&#34;&#34;&#34;
+
+    #: Obsah prázdného pole na desce.
+    CELL_EMPTY = 0
+
+    #: Vítězství nebo remíza? Nic, nejde určit.
+    WT_NONE = 0
+    #: Vítězství nebo remíza? Jsem vítěz.
+    WT_WINNER = 1
+    #: Vítězství nebo remíza? Nejsem vítěz.
+    WT_LOSER = 2
+    #: Vítězství nebo remíza? Je to remíza.
+    WT_TIE = 3
+
+    def __init__(self, rows, cols, width, height, x_offset, y_offset) -&gt; None:
+        #: Počet řádků.
+        self.rows = rows
+        #: Počet sloupců.
+        self.cols = cols
+        #: Velikost na ose x v px.
+        self.width = width
+        #: Velikost na ose y v px.
+        self.height = height
+        #: Velikost strany jednoho hracího pole.
+        self.sqsize = width // cols
+        #: Posun na ose x, kam se bude deska vykreslovat.
+        self.x_offset = x_offset
+        #: Posun na ose y, kam se bude deska vykreslovat.
+        self.y_offset = y_offset
+        #: Seznam seznamů (2D pole), kde je umístění kamenů na desce.
+        self.grid = [[0 for col in range(self.cols)] for row in range(self.rows)]
+        #: Seznam seznamů (2D pole), kde je info o hracích polích, které použijeme pro vyhodnocení interakce s hráčem.
+        self.btns = [[pygame.Rect for col in range(self.cols)] for row in range(self.rows)]
+
+    def draw(self, screen, players: Players = None) -&gt; None: # type: ignore
+        &#34;&#34;&#34;
+        Vykreslení herní plochy. Nejdřív nakreslíme pole `pygame.Rect`. Každý v poli o velikosti o jedna menší, než velikost `pyshqorky.board.Board.sqsize`. To pro zobrazení mřížky.
+        Potom, pokud jsme dostali v parametru i seznam hráčů, nakreslíme jejich kameny na každé pole, kde se nacházejí.
+        &#34;&#34;&#34;
+        # vykreslení herní plochy
+        for r in range (self.rows):
+            for c in range(self.cols):
+                self.btns[r][c] = pygame.draw.rect(screen, (0x40,0x40,0x40), pygame.Rect(self.sqsize*r+self.x_offset, # type: ignore
+                                                                                         self.sqsize*c+self.y_offset,
+                                                                                         self.sqsize-1, self.sqsize-1))
+                if players is not None:
+                    for id, pl in players.items():
+                        if self.grid[r][c] == pl.id:
+                            match pl.shape:
+                                case Player.SHAPE_SQUARE:
+                                    pygame.draw.rect(screen, pl.color, pygame.Rect(self.sqsize*r+self.x_offset+(self.sqsize/8),
+                                                                                    self.sqsize*c+self.y_offset+(self.sqsize/8),
+                                                                                    self.sqsize-(self.sqsize/4),
+                                                                                    self.sqsize-(self.sqsize/4)))
+                                case Player.SHAPE_CIRCLE:
+                                    pygame.draw.circle(screen, pl.color, (self.sqsize*r+self.x_offset+(self.sqsize/2),
+                                                                        self.sqsize*c+self.y_offset+(self.sqsize/2)),
+                                                                        self.sqsize*0.45)
+                                case Player.SHAPE_SYMBOL:
+                                    #ToDo
+                                    pass
+
+    def score_wnd5(self, window: list, player: Player) -&gt; int:
+        &#34;&#34;&#34;
+        Ohodnocení výseku 1x5 z hrací desky z pohledu hráče (počítačového). Jestliže je tu prázdno nebo jsou tu oba protivníci, skóre je nula.
+        Jestli je tu hráč sám, skóre se přičítá a pokud pouze protihráč, skóre se odečítá.
+        Kolik se toho přičte nebo odečte, záleží na úrovni hry počítače, jestli jsou to kameny hráče nebo protivníka a počtu kamenů v této pětici.
+        Hodnota se vezme ze slovníku `pyshqorky.player.Player.AI_VALUES`
+        &#34;&#34;&#34;
+        score = 0
+
+        # jestliže je tu prázdno
+        if window.count(Board.CELL_EMPTY) == 5:
+            return 0
+        # jestliže v této pětici jsme
+        if window.count(player.id) != 0:
+            # a nejsme tu sami
+            if window.count(player.oponent_id) != 0:
+                return 0
+            # pokud jsme tu sami
+            else:
+                # tak přičteme hodnotu odpovídající počtu našich značek
+                score += Player.AI_VALUES[player.ai_level][Player.AI_SCORE_MY][window.count(player.id)]
+        else:
+            # je tu pouze protivník, takže odečteme hodnotu odpovídající počtu jeho značek
+            score -= Player.AI_VALUES[player.ai_level][Player.AI_SCORE_OPONENT][window.count(player.oponent_id)]
+
+        return score
+
+    def score_board(self, player: Player) -&gt; int:
+        &#34;&#34;&#34;
+        Projedeme na hrací desce všechna pole 1x5. Pro každé takové pole voláme `pyshqorky.board.Board.score_wnd5`.
+        Nasčítáme všechna skóre, která se nám vrátila a vracíme to jako ohodnocení celé desky.
+        &#34;&#34;&#34;
+        score = 0
+
+        # ohodnocení řádků
+        for r in range(self.rows):
+            row_array = [int(i) for i in list(self.grid[r][:])]
+            for c in range(self.cols-4):
+                window = row_array[c:c+5]
+                score += self.score_wnd5(window, player)
+
+        # ohodnocení sloupců
+        for c in range(self.cols):
+            col_array = [i[:][c] for i in self.grid]
+            for r in range(self.rows-4):
+                window = col_array[r:r+5]
+                score += self.score_wnd5(window, player)
+
+        # ohodnocení diagonál (\ i /)
+        for r in range(self.rows-4):
+            for c in range(self.cols-4):
+                # to je \
+                window = [self.grid[r+i][c+i] for i in range(5)]
+                score += self.score_wnd5(window, player)
+                # a tohle /
+                window = [self.grid[r+4-i][c+i] for i in range(5)]
+                score += self.score_wnd5(window, player)
+
+        return score
+
+    # vracíme WT_NONE, když je možné hrát dál
+    # WT_WINNER, pokud je vítězem player
+    # WT_LOSER, pokud je vítězem oponent
+    # WT_TIE, pokud v této pětici nejde dosáhnout vítězství
+    def win_tie_wnd5(self, window: list, player: Player) -&gt; int:
+        &#34;&#34;&#34;
+        Zde hodnotíme z pohledu výhra / prohra /remíza výsek z boardu o velikosti 1 x 5.
+        Pokud je tam pouze player, vyhrál. Pokud je tam pouze oponent, player prohrál.
+        Pokud jsou tam oba, tak zde již nikdo pětku neudělá.
+        Pokud neplatí nic z toho, je možné hrát dál.
+        :param window: Výsek z boardu 1 x 5.
+        :type window: list
+        :param player: Hodnotíme z pohledu tohoto hráče
+        :type player: Player
+        :return: Vrací možné hodnoty WT_WINNER, pokud player zvítězil, WT_LOSER pokud prohrál, WT_TIE pokud zde již není možné vyhrát nebo WT_NONE, pokud je možné zde ještě vyhrát.
+        :rtype: int
+        &#34;&#34;&#34;
+        # jestliže máme pět
+        if window.count(player.id) == 5:
+            return self.WT_WINNER
+
+        # jestli má pět oponent
+        if window.count(player.oponent_id) == 5:
+            return self.WT_LOSER
+        
+        # zde již není možné vyhrát
+        if window.count(player.id) != 0 and window.count(player.oponent_id) != 0:
+            return self.WT_TIE
+        
+        # jinak je možné pořád hrát dál
+        return self.WT_NONE
+
+    def win_tie(self, player: Player) -&gt; int:
+        &#34;&#34;&#34;
+        Zde projedeme celý board a z pohledu hráče zhodnotíme, jestli jsme vyhráli nebo prohráli, jestli je remíza nebo hrajeme dál.
+        Technicky je to provedeno tak, že projedeme všechna okna 1 x 5, co jsou na desce a zhodnotíme je ve vlastní funkci win_tie_wnd5.
+        Podle toho odsud vracíme hodnoty dál.
+        :param player: Hodnotíme z pohledu tohoto hráče
+        :type player: Player
+        :return: Vrací možné hodnoty WT_WINNER, pokud player zvítězil, WT_LOSER pokud prohrál, WT_TIE pokud je remíza nebo WT_NONE, pokud je možné hrát dál.
+        :rtype: int
+        &#34;&#34;&#34;
+        wt5 = None
+        tie = self.WT_TIE
+
+        # ohodnocení řádků
+        for r in range(self.rows):
+            row_array = [int(i) for i in list(self.grid[r][:])]
+            for c in range(self.cols-4):
+                window = row_array[c:c+5]
+                wt5 = self.win_tie_wnd5(window, player)
+                if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
+                    return wt5
+                elif wt5 == self.WT_NONE:
+                    tie = wt5
+
+        # ohodnocení sloupců
+        for c in range(self.cols):
+            col_array = [i[:][c] for i in self.grid]
+            for r in range(self.rows-4):
+                window = col_array[r:r+5]
+                wt5 = self.win_tie_wnd5(window, player)
+                if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
+                    return wt5
+                elif wt5 == self.WT_NONE:
+                    tie = wt5
+
+        # ohodnocení diagonál (\ i /)
+        for r in range(self.rows-4):
+            for c in range(self.cols-4):
+                # to je \
+                window = [self.grid[r+i][c+i] for i in range(5)]
+                wt5 = self.win_tie_wnd5(window, player)
+                if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
+                    return wt5
+                elif wt5 == self.WT_NONE:
+                    tie = wt5
+                # a tohle /
+                window = [self.grid[r+4-i][c+i] for i in range(5)]
+                wt5 = self.win_tie_wnd5(window, player)
+                if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
+                    return wt5
+                elif wt5 == self.WT_NONE:
+                    tie = wt5
+        
+        # nikdo ještě nevyhrál, tak vracíme, jestli byla remíza nebo ne
+        return tie
+
+    def best_move(self, player: Player) -&gt; tuple:
+        avail_moves = []
+        # spočítáme ohodnocení každého možného tahu a potom se rozhodneme
+        best_score = -math.inf
+        for r in range(self.rows):
+            for c in range(self.cols):
+                if self.grid[r][c] == Board.CELL_EMPTY:
+                    self.grid[r][c] = player.id
+                    score = self.score_board(player)
+                    self.grid[r][c] = Board.CELL_EMPTY
+                    if (score &gt; best_score):
+                        avail_moves = []
+                        avail_moves.append((r,c))
+                        best_score = score
+                    elif (score == best_score):
+                        avail_moves.append((r,c))
+        return random.choice(avail_moves)
+
+    def make_move(self, player: Player, coord: tuple):
+        self.grid[coord[0]][coord[1]] = player.id
+
+    def reset(self):
+        self.grid = [[0 for col in range(self.cols)] for row in range(self.rows)]
+        self.btns = [[pygame.Rect for col in range(self.cols)] for row in range(self.rows)]
+        pass</code></pre>
+</details>
+<h3>Class variables</h3>
+<dl>
+<dt id="pyshqorky.board.Board.CELL_EMPTY"><code class="name">var <span class="ident">CELL_EMPTY</span></code></dt>
+<dd>
+<div class="desc"><p>Obsah prázdného pole na desce.</p></div>
+</dd>
+<dt id="pyshqorky.board.Board.WT_LOSER"><code class="name">var <span class="ident">WT_LOSER</span></code></dt>
+<dd>
+<div class="desc"><p>Vítězství nebo remíza? Nejsem vítěz.</p></div>
+</dd>
+<dt id="pyshqorky.board.Board.WT_NONE"><code class="name">var <span class="ident">WT_NONE</span></code></dt>
+<dd>
+<div class="desc"><p>Vítězství nebo remíza? Nic, nejde určit.</p></div>
+</dd>
+<dt id="pyshqorky.board.Board.WT_TIE"><code class="name">var <span class="ident">WT_TIE</span></code></dt>
+<dd>
+<div class="desc"><p>Vítězství nebo remíza? Je to remíza.</p></div>
+</dd>
+<dt id="pyshqorky.board.Board.WT_WINNER"><code class="name">var <span class="ident">WT_WINNER</span></code></dt>
+<dd>
+<div class="desc"><p>Vítězství nebo remíza? Jsem vítěz.</p></div>
+</dd>
+</dl>
+<h3>Instance variables</h3>
+<dl>
+<dt id="pyshqorky.board.Board.btns"><code class="name">var <span class="ident">btns</span></code></dt>
+<dd>
+<div class="desc"><p>Seznam seznamů (2D pole), kde je info o hracích polích, které použijeme pro vyhodnocení interakce s hráčem.</p></div>
+</dd>
+<dt id="pyshqorky.board.Board.cols"><code class="name">var <span class="ident">cols</span></code></dt>
+<dd>
+<div class="desc"><p>Počet sloupců.</p></div>
+</dd>
+<dt id="pyshqorky.board.Board.grid"><code class="name">var <span class="ident">grid</span></code></dt>
+<dd>
+<div class="desc"><p>Seznam seznamů (2D pole), kde je umístění kamenů na desce.</p></div>
+</dd>
+<dt id="pyshqorky.board.Board.height"><code class="name">var <span class="ident">height</span></code></dt>
+<dd>
+<div class="desc"><p>Velikost na ose y v px.</p></div>
+</dd>
+<dt id="pyshqorky.board.Board.rows"><code class="name">var <span class="ident">rows</span></code></dt>
+<dd>
+<div class="desc"><p>Počet řádků.</p></div>
+</dd>
+<dt id="pyshqorky.board.Board.sqsize"><code class="name">var <span class="ident">sqsize</span></code></dt>
+<dd>
+<div class="desc"><p>Velikost strany jednoho hracího pole.</p></div>
+</dd>
+<dt id="pyshqorky.board.Board.width"><code class="name">var <span class="ident">width</span></code></dt>
+<dd>
+<div class="desc"><p>Velikost na ose x v px.</p></div>
+</dd>
+<dt id="pyshqorky.board.Board.x_offset"><code class="name">var <span class="ident">x_offset</span></code></dt>
+<dd>
+<div class="desc"><p>Posun na ose x, kam se bude deska vykreslovat.</p></div>
+</dd>
+<dt id="pyshqorky.board.Board.y_offset"><code class="name">var <span class="ident">y_offset</span></code></dt>
+<dd>
+<div class="desc"><p>Posun na ose y, kam se bude deska vykreslovat.</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="pyshqorky.board.Board.best_move"><code class="name flex">
+<span>def <span class="ident">best_move</span></span>(<span>self, player: <a title="pyshqorky.player.Player" href="player.html#pyshqorky.player.Player">Player</a>) ‑> tuple</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def best_move(self, player: Player) -&gt; tuple:
+    avail_moves = []
+    # spočítáme ohodnocení každého možného tahu a potom se rozhodneme
+    best_score = -math.inf
+    for r in range(self.rows):
+        for c in range(self.cols):
+            if self.grid[r][c] == Board.CELL_EMPTY:
+                self.grid[r][c] = player.id
+                score = self.score_board(player)
+                self.grid[r][c] = Board.CELL_EMPTY
+                if (score &gt; best_score):
+                    avail_moves = []
+                    avail_moves.append((r,c))
+                    best_score = score
+                elif (score == best_score):
+                    avail_moves.append((r,c))
+    return random.choice(avail_moves)</code></pre>
+</details>
+</dd>
+<dt id="pyshqorky.board.Board.draw"><code class="name flex">
+<span>def <span class="ident">draw</span></span>(<span>self, screen, players: <a title="pyshqorky.players.Players" href="players.html#pyshqorky.players.Players">Players</a> = None) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Vykreslení herní plochy. Nejdřív nakreslíme pole <code>pygame.Rect</code>. Každý v poli o velikosti o jedna menší, než velikost <code><a title="pyshqorky.board.Board.sqsize" href="#pyshqorky.board.Board.sqsize">Board.sqsize</a></code>. To pro zobrazení mřížky.
+Potom, pokud jsme dostali v parametru i seznam hráčů, nakreslíme jejich kameny na každé pole, kde se nacházejí.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def draw(self, screen, players: Players = None) -&gt; None: # type: ignore
+    &#34;&#34;&#34;
+    Vykreslení herní plochy. Nejdřív nakreslíme pole `pygame.Rect`. Každý v poli o velikosti o jedna menší, než velikost `pyshqorky.board.Board.sqsize`. To pro zobrazení mřížky.
+    Potom, pokud jsme dostali v parametru i seznam hráčů, nakreslíme jejich kameny na každé pole, kde se nacházejí.
+    &#34;&#34;&#34;
+    # vykreslení herní plochy
+    for r in range (self.rows):
+        for c in range(self.cols):
+            self.btns[r][c] = pygame.draw.rect(screen, (0x40,0x40,0x40), pygame.Rect(self.sqsize*r+self.x_offset, # type: ignore
+                                                                                     self.sqsize*c+self.y_offset,
+                                                                                     self.sqsize-1, self.sqsize-1))
+            if players is not None:
+                for id, pl in players.items():
+                    if self.grid[r][c] == pl.id:
+                        match pl.shape:
+                            case Player.SHAPE_SQUARE:
+                                pygame.draw.rect(screen, pl.color, pygame.Rect(self.sqsize*r+self.x_offset+(self.sqsize/8),
+                                                                                self.sqsize*c+self.y_offset+(self.sqsize/8),
+                                                                                self.sqsize-(self.sqsize/4),
+                                                                                self.sqsize-(self.sqsize/4)))
+                            case Player.SHAPE_CIRCLE:
+                                pygame.draw.circle(screen, pl.color, (self.sqsize*r+self.x_offset+(self.sqsize/2),
+                                                                    self.sqsize*c+self.y_offset+(self.sqsize/2)),
+                                                                    self.sqsize*0.45)
+                            case Player.SHAPE_SYMBOL:
+                                #ToDo
+                                pass</code></pre>
+</details>
+</dd>
+<dt id="pyshqorky.board.Board.make_move"><code class="name flex">
+<span>def <span class="ident">make_move</span></span>(<span>self, player: <a title="pyshqorky.player.Player" href="player.html#pyshqorky.player.Player">Player</a>, coord: tuple)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def make_move(self, player: Player, coord: tuple):
+    self.grid[coord[0]][coord[1]] = player.id</code></pre>
+</details>
+</dd>
+<dt id="pyshqorky.board.Board.reset"><code class="name flex">
+<span>def <span class="ident">reset</span></span>(<span>self)</span>
+</code></dt>
+<dd>
+<div class="desc"></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def reset(self):
+    self.grid = [[0 for col in range(self.cols)] for row in range(self.rows)]
+    self.btns = [[pygame.Rect for col in range(self.cols)] for row in range(self.rows)]
+    pass</code></pre>
+</details>
+</dd>
+<dt id="pyshqorky.board.Board.score_board"><code class="name flex">
+<span>def <span class="ident">score_board</span></span>(<span>self, player: <a title="pyshqorky.player.Player" href="player.html#pyshqorky.player.Player">Player</a>) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Projedeme na hrací desce všechna pole 1x5. Pro každé takové pole voláme <code><a title="pyshqorky.board.Board.score_wnd5" href="#pyshqorky.board.Board.score_wnd5">Board.score_wnd5()</a></code>.
+Nasčítáme všechna skóre, která se nám vrátila a vracíme to jako ohodnocení celé desky.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def score_board(self, player: Player) -&gt; int:
+    &#34;&#34;&#34;
+    Projedeme na hrací desce všechna pole 1x5. Pro každé takové pole voláme `pyshqorky.board.Board.score_wnd5`.
+    Nasčítáme všechna skóre, která se nám vrátila a vracíme to jako ohodnocení celé desky.
+    &#34;&#34;&#34;
+    score = 0
+
+    # ohodnocení řádků
+    for r in range(self.rows):
+        row_array = [int(i) for i in list(self.grid[r][:])]
+        for c in range(self.cols-4):
+            window = row_array[c:c+5]
+            score += self.score_wnd5(window, player)
+
+    # ohodnocení sloupců
+    for c in range(self.cols):
+        col_array = [i[:][c] for i in self.grid]
+        for r in range(self.rows-4):
+            window = col_array[r:r+5]
+            score += self.score_wnd5(window, player)
+
+    # ohodnocení diagonál (\ i /)
+    for r in range(self.rows-4):
+        for c in range(self.cols-4):
+            # to je \
+            window = [self.grid[r+i][c+i] for i in range(5)]
+            score += self.score_wnd5(window, player)
+            # a tohle /
+            window = [self.grid[r+4-i][c+i] for i in range(5)]
+            score += self.score_wnd5(window, player)
+
+    return score</code></pre>
+</details>
+</dd>
+<dt id="pyshqorky.board.Board.score_wnd5"><code class="name flex">
+<span>def <span class="ident">score_wnd5</span></span>(<span>self, window: list, player: <a title="pyshqorky.player.Player" href="player.html#pyshqorky.player.Player">Player</a>) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Ohodnocení výseku 1x5 z hrací desky z pohledu hráče (počítačového). Jestliže je tu prázdno nebo jsou tu oba protivníci, skóre je nula.
+Jestli je tu hráč sám, skóre se přičítá a pokud pouze protihráč, skóre se odečítá.
+Kolik se toho přičte nebo odečte, záleží na úrovni hry počítače, jestli jsou to kameny hráče nebo protivníka a počtu kamenů v této pětici.
+Hodnota se vezme ze slovníku <code><a title="pyshqorky.player.Player.AI_VALUES" href="player.html#pyshqorky.player.Player.AI_VALUES">Player.AI_VALUES</a></code></p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def score_wnd5(self, window: list, player: Player) -&gt; int:
+    &#34;&#34;&#34;
+    Ohodnocení výseku 1x5 z hrací desky z pohledu hráče (počítačového). Jestliže je tu prázdno nebo jsou tu oba protivníci, skóre je nula.
+    Jestli je tu hráč sám, skóre se přičítá a pokud pouze protihráč, skóre se odečítá.
+    Kolik se toho přičte nebo odečte, záleží na úrovni hry počítače, jestli jsou to kameny hráče nebo protivníka a počtu kamenů v této pětici.
+    Hodnota se vezme ze slovníku `pyshqorky.player.Player.AI_VALUES`
+    &#34;&#34;&#34;
+    score = 0
+
+    # jestliže je tu prázdno
+    if window.count(Board.CELL_EMPTY) == 5:
+        return 0
+    # jestliže v této pětici jsme
+    if window.count(player.id) != 0:
+        # a nejsme tu sami
+        if window.count(player.oponent_id) != 0:
+            return 0
+        # pokud jsme tu sami
+        else:
+            # tak přičteme hodnotu odpovídající počtu našich značek
+            score += Player.AI_VALUES[player.ai_level][Player.AI_SCORE_MY][window.count(player.id)]
+    else:
+        # je tu pouze protivník, takže odečteme hodnotu odpovídající počtu jeho značek
+        score -= Player.AI_VALUES[player.ai_level][Player.AI_SCORE_OPONENT][window.count(player.oponent_id)]
+
+    return score</code></pre>
+</details>
+</dd>
+<dt id="pyshqorky.board.Board.win_tie"><code class="name flex">
+<span>def <span class="ident">win_tie</span></span>(<span>self, player: <a title="pyshqorky.player.Player" href="player.html#pyshqorky.player.Player">Player</a>) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Zde projedeme celý board a z pohledu hráče zhodnotíme, jestli jsme vyhráli nebo prohráli, jestli je remíza nebo hrajeme dál.
+Technicky je to provedeno tak, že projedeme všechna okna 1 x 5, co jsou na desce a zhodnotíme je ve vlastní funkci win_tie_wnd5.
+Podle toho odsud vracíme hodnoty dál.
+:param player: Hodnotíme z pohledu tohoto hráče
+:type player: Player
+:return: Vrací možné hodnoty WT_WINNER, pokud player zvítězil, WT_LOSER pokud prohrál, WT_TIE pokud je remíza nebo WT_NONE, pokud je možné hrát dál.
+:rtype: int</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def win_tie(self, player: Player) -&gt; int:
+    &#34;&#34;&#34;
+    Zde projedeme celý board a z pohledu hráče zhodnotíme, jestli jsme vyhráli nebo prohráli, jestli je remíza nebo hrajeme dál.
+    Technicky je to provedeno tak, že projedeme všechna okna 1 x 5, co jsou na desce a zhodnotíme je ve vlastní funkci win_tie_wnd5.
+    Podle toho odsud vracíme hodnoty dál.
+    :param player: Hodnotíme z pohledu tohoto hráče
+    :type player: Player
+    :return: Vrací možné hodnoty WT_WINNER, pokud player zvítězil, WT_LOSER pokud prohrál, WT_TIE pokud je remíza nebo WT_NONE, pokud je možné hrát dál.
+    :rtype: int
+    &#34;&#34;&#34;
+    wt5 = None
+    tie = self.WT_TIE
+
+    # ohodnocení řádků
+    for r in range(self.rows):
+        row_array = [int(i) for i in list(self.grid[r][:])]
+        for c in range(self.cols-4):
+            window = row_array[c:c+5]
+            wt5 = self.win_tie_wnd5(window, player)
+            if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
+                return wt5
+            elif wt5 == self.WT_NONE:
+                tie = wt5
+
+    # ohodnocení sloupců
+    for c in range(self.cols):
+        col_array = [i[:][c] for i in self.grid]
+        for r in range(self.rows-4):
+            window = col_array[r:r+5]
+            wt5 = self.win_tie_wnd5(window, player)
+            if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
+                return wt5
+            elif wt5 == self.WT_NONE:
+                tie = wt5
+
+    # ohodnocení diagonál (\ i /)
+    for r in range(self.rows-4):
+        for c in range(self.cols-4):
+            # to je \
+            window = [self.grid[r+i][c+i] for i in range(5)]
+            wt5 = self.win_tie_wnd5(window, player)
+            if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
+                return wt5
+            elif wt5 == self.WT_NONE:
+                tie = wt5
+            # a tohle /
+            window = [self.grid[r+4-i][c+i] for i in range(5)]
+            wt5 = self.win_tie_wnd5(window, player)
+            if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
+                return wt5
+            elif wt5 == self.WT_NONE:
+                tie = wt5
+    
+    # nikdo ještě nevyhrál, tak vracíme, jestli byla remíza nebo ne
+    return tie</code></pre>
+</details>
+</dd>
+<dt id="pyshqorky.board.Board.win_tie_wnd5"><code class="name flex">
+<span>def <span class="ident">win_tie_wnd5</span></span>(<span>self, window: list, player: <a title="pyshqorky.player.Player" href="player.html#pyshqorky.player.Player">Player</a>) ‑> int</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Zde hodnotíme z pohledu výhra / prohra /remíza výsek z boardu o velikosti 1 x 5.
+Pokud je tam pouze player, vyhrál. Pokud je tam pouze oponent, player prohrál.
+Pokud jsou tam oba, tak zde již nikdo pětku neudělá.
+Pokud neplatí nic z toho, je možné hrát dál.
+:param window: Výsek z boardu 1 x 5.
+:type window: list
+:param player: Hodnotíme z pohledu tohoto hráče
+:type player: Player
+:return: Vrací možné hodnoty WT_WINNER, pokud player zvítězil, WT_LOSER pokud prohrál, WT_TIE pokud zde již není možné vyhrát nebo WT_NONE, pokud je možné zde ještě vyhrát.
+:rtype: int</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def win_tie_wnd5(self, window: list, player: Player) -&gt; int:
+    &#34;&#34;&#34;
+    Zde hodnotíme z pohledu výhra / prohra /remíza výsek z boardu o velikosti 1 x 5.
+    Pokud je tam pouze player, vyhrál. Pokud je tam pouze oponent, player prohrál.
+    Pokud jsou tam oba, tak zde již nikdo pětku neudělá.
+    Pokud neplatí nic z toho, je možné hrát dál.
+    :param window: Výsek z boardu 1 x 5.
+    :type window: list
+    :param player: Hodnotíme z pohledu tohoto hráče
+    :type player: Player
+    :return: Vrací možné hodnoty WT_WINNER, pokud player zvítězil, WT_LOSER pokud prohrál, WT_TIE pokud zde již není možné vyhrát nebo WT_NONE, pokud je možné zde ještě vyhrát.
+    :rtype: int
+    &#34;&#34;&#34;
+    # jestliže máme pět
+    if window.count(player.id) == 5:
+        return self.WT_WINNER
+
+    # jestli má pět oponent
+    if window.count(player.oponent_id) == 5:
+        return self.WT_LOSER
+    
+    # zde již není možné vyhrát
+    if window.count(player.id) != 0 and window.count(player.oponent_id) != 0:
+        return self.WT_TIE
+    
+    # jinak je možné pořád hrát dál
+    return self.WT_NONE</code></pre>
+</details>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<h1>Index</h1>
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3>Super-module</h3>
+<ul>
+<li><code><a title="pyshqorky" href="index.html">pyshqorky</a></code></li>
+</ul>
+</li>
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="pyshqorky.board.Board" href="#pyshqorky.board.Board">Board</a></code></h4>
+<ul class="two-column">
+<li><code><a title="pyshqorky.board.Board.CELL_EMPTY" href="#pyshqorky.board.Board.CELL_EMPTY">CELL_EMPTY</a></code></li>
+<li><code><a title="pyshqorky.board.Board.WT_LOSER" href="#pyshqorky.board.Board.WT_LOSER">WT_LOSER</a></code></li>
+<li><code><a title="pyshqorky.board.Board.WT_NONE" href="#pyshqorky.board.Board.WT_NONE">WT_NONE</a></code></li>
+<li><code><a title="pyshqorky.board.Board.WT_TIE" href="#pyshqorky.board.Board.WT_TIE">WT_TIE</a></code></li>
+<li><code><a title="pyshqorky.board.Board.WT_WINNER" href="#pyshqorky.board.Board.WT_WINNER">WT_WINNER</a></code></li>
+<li><code><a title="pyshqorky.board.Board.best_move" href="#pyshqorky.board.Board.best_move">best_move</a></code></li>
+<li><code><a title="pyshqorky.board.Board.btns" href="#pyshqorky.board.Board.btns">btns</a></code></li>
+<li><code><a title="pyshqorky.board.Board.cols" href="#pyshqorky.board.Board.cols">cols</a></code></li>
+<li><code><a title="pyshqorky.board.Board.draw" href="#pyshqorky.board.Board.draw">draw</a></code></li>
+<li><code><a title="pyshqorky.board.Board.grid" href="#pyshqorky.board.Board.grid">grid</a></code></li>
+<li><code><a title="pyshqorky.board.Board.height" href="#pyshqorky.board.Board.height">height</a></code></li>
+<li><code><a title="pyshqorky.board.Board.make_move" href="#pyshqorky.board.Board.make_move">make_move</a></code></li>
+<li><code><a title="pyshqorky.board.Board.reset" href="#pyshqorky.board.Board.reset">reset</a></code></li>
+<li><code><a title="pyshqorky.board.Board.rows" href="#pyshqorky.board.Board.rows">rows</a></code></li>
+<li><code><a title="pyshqorky.board.Board.score_board" href="#pyshqorky.board.Board.score_board">score_board</a></code></li>
+<li><code><a title="pyshqorky.board.Board.score_wnd5" href="#pyshqorky.board.Board.score_wnd5">score_wnd5</a></code></li>
+<li><code><a title="pyshqorky.board.Board.sqsize" href="#pyshqorky.board.Board.sqsize">sqsize</a></code></li>
+<li><code><a title="pyshqorky.board.Board.width" href="#pyshqorky.board.Board.width">width</a></code></li>
+<li><code><a title="pyshqorky.board.Board.win_tie" href="#pyshqorky.board.Board.win_tie">win_tie</a></code></li>
+<li><code><a title="pyshqorky.board.Board.win_tie_wnd5" href="#pyshqorky.board.Board.win_tie_wnd5">win_tie_wnd5</a></code></li>
+<li><code><a title="pyshqorky.board.Board.x_offset" href="#pyshqorky.board.Board.x_offset">x_offset</a></code></li>
+<li><code><a title="pyshqorky.board.Board.y_offset" href="#pyshqorky.board.Board.y_offset">y_offset</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.10.0</a>.</p>
+</footer>
+</body>
+</html>

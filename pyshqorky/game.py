@@ -1,9 +1,5 @@
-import pygame
-import pygame_gui
-from pyshqorky.players import *
-from pyshqorky.board import *
-
 """
+Původní návrh:
 class Game
 - running
 - mode - menumain, menusettings, run
@@ -12,6 +8,12 @@ class Game
 * menu_settings
 * main
 """
+
+import pygame
+import pygame_gui
+from pyshqorky.players import *
+from pyshqorky.board import *
+
 class Game:
     MODE_QUIT = 0
     MODE_MENU_MAIN = 1
@@ -91,7 +93,7 @@ class Game:
                         for c in range(self.board.cols):
                             if self.board.btns[r][c].collidepoint(pygame.mouse.get_pos()): # type: ignore
                                 print("Klik na " + str(r) + ":" + str(c))
-                                if self.board.grid[r][c] == Board.EMPTY:
+                                if self.board.grid[r][c] == Board.CELL_EMPTY:
                                     if self.players.active.type == Player.TYPE_HUMAN and self.mode == Game.MODE_GAME_RUN:
                                         self.board.make_move(self.players.active, (r, c))
                                         self.mode = Game.MODE_GAME_END_TURN
