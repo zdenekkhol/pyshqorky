@@ -32,22 +32,24 @@ class Game:
     def __init__(self):
         pygame.init()
         #: Stav hry. Na začátku se spouští do hlavního menu.
-        self.state = self.STATE_MENU_MAIN
+        self.state: int = self.STATE_MENU_MAIN
         #: Počet FPS pro běh hry = 30
-        self.fps = 30 # maximální počet FPS
+        self.fps: int = 30 # maximální počet FPS
         #: Kde to zobrazujeme.
-        self.display = pygame.display.set_mode((800, 600))
+        self.display: pygame.Surface = pygame.display.set_mode((800, 600))
         #: Na co kreslíme.
-        self.screen = pygame.Surface((800, 600))
+        self.screen: pygame.Surface = pygame.Surface((800, 600))
         #: Manažer GUI rozhranní
-        self.manager = pygame_gui.UIManager((800, 600))
+        self.manager: pygame_gui.UIManager = pygame_gui.UIManager((800, 600))
         #: Hodiny pro sledování času hry
-        self.clock = pygame.time.Clock()
+        self.clock: pygame.time.Clock = pygame.time.Clock()
+        #: Seznam polí, která budou zvýrazněna (další tah počítače nebo výhra)
+        self.mark_coords: list[tuple[int, int]] | None = None
 
         #: Hrací deska o velikosti 15x15 polí, 525x525 px, offset pro vykreslení do okna je 235x35 px
-        self.board = Board(15, 15, 525, 525, 235, 35)
+        self.board: Board = Board(15, 15, 525, 525, 235, 35)
         #: Seznam hráčů s implicitním nastavením.
-        self.players = Players({
+        self.players: Players = Players({
             Players.PLAYER_1: Player(id=Players.PLAYER_1, name="Human", color=(255, 64, 64), shape=Player.SHAPE_SQUARE, type=Player.TYPE_HUMAN, ai_level=Player.AI_LVL_BALANCED), 
             Players.PLAYER_2: Player(id=Players.PLAYER_2, name="Computer", color=(64, 64, 255), shape=Player.SHAPE_CIRCLE, type=Player.TYPE_AI, ai_level=Player.AI_LVL_BALANCED)
             })
@@ -127,6 +129,8 @@ class Game:
                                     if self.players.active.type == Player.TYPE_HUMAN and self.state == Game.STATE_GAME_RUN:
                                         # tak řekneme desce, že táhnul tam kam kliknul
                                         self.board.make_move(self.players.active, (r, c))
+                                        # konec zvýrazňování
+                                        self.mark_coords = None
                                         # stav je konec tahu
                                         self.state = Game.STATE_GAME_END_TURN
 
@@ -136,26 +140,33 @@ class Game:
                 next_move = self.board.best_move(self.players.active)
                 # proveď ten tah
                 self.board.make_move(self.players.active, next_move)
-                # sstav je konec tahu
+                # zvýrazníme tento tah
+                self.mark_coords = list()
+                self.mark_coords.append(next_move)
+                # stav je konec tahu
                 self.state = Game.STATE_GAME_END_TURN
 
             # je stav konec tahu? vyhodnocení a přepnutí
             if self.state == Game.STATE_GAME_END_TURN:
+                # co nám vrátí wintie?
+                wt_state, to_mark = self.board.win_tie(self.players.active)
                 # Není výhra, prohra ani remíza
-                if self.board.win_tie(self.players.active) == Board.WT_NONE:
+                if wt_state == Board.WT_NONE:
                     # přepneme hráče
                     self.players.next()
                     # a hra jede dál
                     self.state = Game.STATE_GAME_RUN
                 else:
                 # A hle něco se děje, ale co?
-                    match self.board.win_tie(self.players.active):
+                    match wt_state:
                         # Hráč zvítězil
                         case Board.WT_WINNER:
                             print("And The Winner is : " + self.players.active.name)
+                            self.mark_coords = to_mark
                         # Hráč prohrál
                         case Board.WT_LOSER:
                             print("And The Winner is : " + self.players.oponent.name)
+                            self.mark_coords = to_mark
                         # Remíza - ani jeden jedokáže udělat na tomto boardu žádnou pětku
                         case Board.WT_TIE:
                             print("Remíza hoši")
@@ -165,7 +176,7 @@ class Game:
                     self.state = Game.STATE_MENU_MAIN
 
             # vykreslíme hrací desku na kreslící plochu
-            self.board.draw(self.screen, self.players)
+            self.board.draw(self.screen, self.players, self.mark_coords)
 
             # vykreslíme GUI (podle dokumentace a testů musí být právě tady, aby fungovalo správně)
             self.manager.update(time_delta)

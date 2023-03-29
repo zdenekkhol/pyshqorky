@@ -50,7 +50,7 @@ class Board:
         #: Seznam seznamů (2D pole), kde je info o hracích polích, které použijeme pro vyhodnocení interakce s hráčem.
         self.btns = [[pygame.Rect for col in range(self.cols)] for row in range(self.rows)]
 
-    def draw(self, screen, players: Players = None) -> None: # type: ignore
+    def draw(self, screen, players: Players | None = None, mark_coords: list[tuple[int, int]] | None = None) -> None:
         """
         Vykreslení herní plochy. Nejdřív nakreslíme pole `pygame.Rect`. Každý v poli o velikosti o jedna menší, než velikost `pyshqorky.board.Board.sqsize`. To pro zobrazení mřížky.
         Potom, pokud jsme dostali v parametru i seznam hráčů, nakreslíme jejich kameny na každé pole, kde se nacházejí.
@@ -83,6 +83,13 @@ class Board:
                                 case Player.SHAPE_SYMBOL:
                                     #ToDo
                                     pass
+        # nakonec vykreslení zvýraznění, pokud je přítomno
+        if mark_coords is not None:
+            for (r, c) in mark_coords:
+                pygame.draw.circle(screen, (255, 255, 0), (self.sqsize*r+self.x_offset+(self.sqsize/2),
+                                                    self.sqsize*c+self.y_offset+(self.sqsize/2)),
+                                                    self.sqsize*0.15)
+
 
     def score_wnd5(self, window: list, player: Player) -> int:
         """
@@ -149,18 +156,12 @@ class Board:
     # WT_WINNER, pokud je vítězem player
     # WT_LOSER, pokud je vítězem oponent
     # WT_TIE, pokud v této pětici nejde dosáhnout vítězství
-    def win_tie_wnd5(self, window: list, player: Player) -> int:
+    def win_tie_wnd5(self, window: list[int], player: Player) -> int:
         """
         Zde hodnotíme z pohledu hráče výsek z boardu o velikosti 1 x 5 na možnou výhru, prohru nebo remízu.
         Pokud je tam pouze player, vyhrál. Pokud je tam pouze oponent, player prohrál.
-        Pokud jsou tam oba, tak zde již nikdo pětku neudělá.
-        Pokud neplatí nic z toho, je možné hrát dál.
-        :param window: Výsek z boardu 1 x 5.
-        :type window: list
-        :param player: Hodnotíme z pohledu tohoto hráče
-        :type player: Player
-        :return: Vrací možné hodnoty WT_WINNER, pokud player zvítězil, WT_LOSER pokud prohrál, WT_TIE pokud zde již není možné vyhrát nebo WT_NONE, pokud je možné zde ještě vyhrát.
-        :rtype: int
+        Pokud jsou tam oba, tak zde již nikdo pětku neudělá. Pokud neplatí nic z toho, je možné hrát dál.
+        Vrací možné hodnoty WT_WINNER, pokud player zvítězil, WT_LOSER pokud prohrál, WT_TIE pokud zde již není možné vyhrát nebo WT_NONE, pokud je možné zde ještě vyhrát.
         """
         # jestliže máme pět
         if window.count(player.id) == 5:
@@ -177,15 +178,12 @@ class Board:
         # jinak je možné pořád hrát dál
         return self.WT_NONE
 
-    def win_tie(self, player: Player) -> int:
+    def win_tie(self, player: Player) -> tuple[int, list[tuple[int, int]]]:
         """
         Zde projedeme celý board a z pohledu hráče zhodnotíme, jestli jsme vyhráli nebo prohráli, jestli je remíza nebo hrajeme dál.
         Technicky je to provedeno tak, že projedeme všechna okna 1 x 5, co jsou na desce a zhodnotíme je ve vlastní funkci win_tie_wnd5.
-        Podle toho odsud vracíme hodnoty dál.
-        :param player: Hodnotíme z pohledu tohoto hráče
-        :type player: Player
-        :return: Vrací možné hodnoty WT_WINNER, pokud player zvítězil, WT_LOSER pokud prohrál, WT_TIE pokud je remíza nebo WT_NONE, pokud je možné hrát dál.
-        :rtype: int
+        Podle toho odsud vracíme hodnoty dál. Pro vítězství i kde bylo zvítězeno pro označení dané pětky.
+        Jako hlavní integer vracíme WT_WINNER, pokud player zvítězil, WT_LOSER pokud prohrál, WT_TIE pokud je remíza nebo WT_NONE, pokud je možné hrát dál.
         """
         wt5 = None
         tie = self.WT_TIE
@@ -197,7 +195,7 @@ class Board:
                 window = row_array[c:c+5]
                 wt5 = self.win_tie_wnd5(window, player)
                 if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
-                    return wt5
+                    return (wt5, [(r, c+i) for i in range(5)])
                 elif wt5 == self.WT_NONE:
                     tie = wt5
 
@@ -208,7 +206,7 @@ class Board:
                 window = col_array[r:r+5]
                 wt5 = self.win_tie_wnd5(window, player)
                 if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
-                    return wt5
+                    return (wt5, [(r+i,c) for i in range(5)])
                 elif wt5 == self.WT_NONE:
                     tie = wt5
 
@@ -219,19 +217,19 @@ class Board:
                 window = [self.grid[r+i][c+i] for i in range(5)]
                 wt5 = self.win_tie_wnd5(window, player)
                 if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
-                    return wt5
+                    return (wt5, [(r+i, c+i) for i in range(5)])
                 elif wt5 == self.WT_NONE:
                     tie = wt5
                 # a tohle /
                 window = [self.grid[r+4-i][c+i] for i in range(5)]
                 wt5 = self.win_tie_wnd5(window, player)
                 if (wt5 in (self.WT_WINNER, self.WT_LOSER)):
-                    return wt5
+                    return (wt5, [(r+4-i, c+i) for i in range(5)])
                 elif wt5 == self.WT_NONE:
                     tie = wt5
         
         # nikdo ještě nevyhrál, tak vracíme, jestli byla remíza nebo ne
-        return tie
+        return (tie, list())
 
     def best_move(self, player: Player) -> tuple:
         """
