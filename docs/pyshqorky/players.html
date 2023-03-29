@@ -109,7 +109,10 @@ class Players(dict[int, Player]):
             return loaded
         except FileNotFoundError:
             return None # type: ignore
-                </code></pre>
+        
+    def score(self) -&gt; str:
+        &#34;&#34;&#34;Vrací skóre vítězství pro zobrazení ve tvaru 0 : 0&#34;&#34;&#34;
+        return &#34;{} : {}&#34;.format(self.__getitem__(Players.PLAYER_1).win_count, self.__getitem__(Players.PLAYER_2).win_count)                </code></pre>
 </details>
 </section>
 <section>
@@ -190,7 +193,11 @@ Na začátku naplníme slovník. Očekávám dva hráče s id 1 a -1.</p></div>
             pf.close()
             return loaded
         except FileNotFoundError:
-            return None # type: ignore</code></pre>
+            return None # type: ignore
+        
+    def score(self) -&gt; str:
+        &#34;&#34;&#34;Vrací skóre vítězství pro zobrazení ve tvaru 0 : 0&#34;&#34;&#34;
+        return &#34;{} : {}&#34;.format(self.__getitem__(Players.PLAYER_1).win_count, self.__getitem__(Players.PLAYER_2).win_count)                </code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -322,6 +329,20 @@ Otevřeme soubor filename (defultně .savegame) pro zápis a dumpneme tam tento 
     pf.close()</code></pre>
 </details>
 </dd>
+<dt id="pyshqorky.players.Players.score"><code class="name flex">
+<span>def <span class="ident">score</span></span>(<span>self) ‑> str</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Vrací skóre vítězství pro zobrazení ve tvaru 0 : 0</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def score(self) -&gt; str:
+    &#34;&#34;&#34;Vrací skóre vítězství pro zobrazení ve tvaru 0 : 0&#34;&#34;&#34;
+    return &#34;{} : {}&#34;.format(self.__getitem__(Players.PLAYER_1).win_count, self.__getitem__(Players.PLAYER_2).win_count)                </code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -352,6 +373,7 @@ Otevřeme soubor filename (defultně .savegame) pro zápis a dumpneme tam tento 
 <li><code><a title="pyshqorky.players.Players.oponent" href="#pyshqorky.players.Players.oponent">oponent</a></code></li>
 <li><code><a title="pyshqorky.players.Players.reset" href="#pyshqorky.players.Players.reset">reset</a></code></li>
 <li><code><a title="pyshqorky.players.Players.save" href="#pyshqorky.players.Players.save">save</a></code></li>
+<li><code><a title="pyshqorky.players.Players.score" href="#pyshqorky.players.Players.score">score</a></code></li>
 </ul>
 </li>
 </ul>

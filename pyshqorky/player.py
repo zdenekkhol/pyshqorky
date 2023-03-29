@@ -66,11 +66,17 @@ class Player:
         self.type = type
         #: Úroveň hry počítače
         self.ai_level = ai_level
+        #: Počet vítězných her od začátku
+        self.win_count: int = 0
 
     @property
     def oponent_id(self) -> int:
         """Vrací id protihráče."""
         return -self.id
+    
+    def wins(self) -> None:
+        """Tento hráč tuto hru vyhrál, přičteme mu to do počtu vítězství"""
+        self.win_count += 1
     
 
     

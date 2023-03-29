@@ -107,11 +107,17 @@ class Player:
         self.type = type
         #: Úroveň hry počítače
         self.ai_level = ai_level
+        #: Počet vítězných her od začátku
+        self.win_count: int = 0
 
     @property
     def oponent_id(self) -&gt; int:
         &#34;&#34;&#34;Vrací id protihráče.&#34;&#34;&#34;
         return -self.id
+    
+    def wins(self) -&gt; None:
+        &#34;&#34;&#34;Tento hráč tuto hru vyhrál, přičteme mu to do počtu vítězství&#34;&#34;&#34;
+        self.win_count += 1
     
 
     </code></pre>
@@ -194,11 +200,17 @@ class Player:
         self.type = type
         #: Úroveň hry počítače
         self.ai_level = ai_level
+        #: Počet vítězných her od začátku
+        self.win_count: int = 0
 
     @property
     def oponent_id(self) -&gt; int:
         &#34;&#34;&#34;Vrací id protihráče.&#34;&#34;&#34;
-        return -self.id</code></pre>
+        return -self.id
+    
+    def wins(self) -&gt; None:
+        &#34;&#34;&#34;Tento hráč tuto hru vyhrál, přičteme mu to do počtu vítězství&#34;&#34;&#34;
+        self.win_count += 1</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -305,6 +317,27 @@ def oponent_id(self) -&gt; int:
 <dd>
 <div class="desc"><p>Typ hráče</p></div>
 </dd>
+<dt id="pyshqorky.player.Player.win_count"><code class="name">var <span class="ident">win_count</span></code></dt>
+<dd>
+<div class="desc"><p>Počet vítězných her od začátku</p></div>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="pyshqorky.player.Player.wins"><code class="name flex">
+<span>def <span class="ident">wins</span></span>(<span>self) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Tento hráč tuto hru vyhrál, přičteme mu to do počtu vítězství</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def wins(self) -&gt; None:
+    &#34;&#34;&#34;Tento hráč tuto hru vyhrál, přičteme mu to do počtu vítězství&#34;&#34;&#34;
+    self.win_count += 1</code></pre>
+</details>
+</dd>
 </dl>
 </dd>
 </dl>
@@ -348,6 +381,8 @@ def oponent_id(self) -&gt; int:
 <li><code><a title="pyshqorky.player.Player.shape_list" href="#pyshqorky.player.Player.shape_list">shape_list</a></code></li>
 <li><code><a title="pyshqorky.player.Player.type" href="#pyshqorky.player.Player.type">type</a></code></li>
 <li><code><a title="pyshqorky.player.Player.type_list" href="#pyshqorky.player.Player.type_list">type_list</a></code></li>
+<li><code><a title="pyshqorky.player.Player.win_count" href="#pyshqorky.player.Player.win_count">win_count</a></code></li>
+<li><code><a title="pyshqorky.player.Player.wins" href="#pyshqorky.player.Player.wins">wins</a></code></li>
 </ul>
 </li>
 </ul>

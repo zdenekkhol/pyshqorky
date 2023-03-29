@@ -17,6 +17,7 @@ from pyshqorky.board import *
 class Game:
     """
     Třída pro ovládání hry a jejích událostí.
+    Pokud z nějakého neznámého důvodu padá hra na chybu 'Player' nebo 'Players 'object has no attribute 'cokoliv', je třeba vymazat soubor .savegame.
     """
     #: Stav hry: Konec
     STATE_QUIT = 0
@@ -74,11 +75,16 @@ class Game:
         """
         # okno hlavního menu
         ui_menu = pygame_gui.elements.UIWindow(rect=pygame.Rect((0, 0), (200, 600)), manager=self.manager, window_display_title="Menu", draggable=False)
+        # zneaktivnění křížku v menu, aby se nezavřelo
         ui_menu.close_window_button = None
         # definice tlačítek
         btn_run = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 10), (100, 50)), text='Run', manager=self.manager, container=ui_menu, anchors={'centerx': 'centerx'})
         btn_settings = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 60), (100, 50)), text="Settings", manager=self.manager, container=ui_menu, anchors={'centerx': 'centerx'})
         btn_quit = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 480), (100, 50)), text='Quit', manager=self.manager, container=ui_menu, anchors={'centerx': 'centerx'})
+        # label pro počet vítězství
+        lbl_score = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((95, 0), (100, 30)),
+                                    text=self.players.score(),
+                                    manager=self.manager, anchors={'centerx': 'centerx'})
 
         # hlavní smyčka hry
         while self.state > Game.STATE_QUIT:
@@ -99,6 +105,7 @@ class Game:
                         # resetujeme hráče a hrací desku do nastavení pro začátek hry
                         self.players.reset()
                         self.board.reset()
+                        self.mark_coords = None
                         # neumožníme znovuspustit hru, pokud běží
                         btn_run.disable()
                     # zobrazíme nastavení
@@ -163,13 +170,18 @@ class Game:
                         case Board.WT_WINNER:
                             print("And The Winner is : " + self.players.active.name)
                             self.mark_coords = to_mark
+                            self.players.active.wins()
                         # Hráč prohrál
                         case Board.WT_LOSER:
                             print("And The Winner is : " + self.players.oponent.name)
                             self.mark_coords = to_mark
+                            self.players.oponent.wins()
                         # Remíza - ani jeden jedokáže udělat na tomto boardu žádnou pětku
                         case Board.WT_TIE:
                             print("Remíza hoši")
+                    # Aktualizace skóre
+                    #lbl_score.text = self.players.score()
+                    lbl_score.set_text(self.players.score())
                     # Povolíme spustit další hru
                     btn_run.enable()
                     # a stav je hlavní menu
@@ -203,7 +215,7 @@ class Game:
 
         # vytvoříme okno menu nastavení
         ui_settings = pygame_gui.elements.UIWindow(rect=pygame.Rect((30, 30), (300, 560)), manager=self.manager, window_display_title="Settings", draggable=False)
-        ui_settings.close_window_button = None
+        #ui_settings.close_window_button = None
         # tlačítko pro uložení
         btn_save = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 440), (100, 50)), text='Save', manager=self.manager, container=ui_settings, anchors={'centerx': 'centerx'})
 
@@ -272,6 +284,9 @@ class Game:
                         self.players.save()
                         # vrátíme se do předchozího módu
                         self.state = prev_mode
+                # křížek pro zavření menu = návrat bez uložení
+                if event.type == pygame_gui.UI_WINDOW_CLOSE:
+                    self.state = prev_mode
                 # tyhle GUI eventy nakonec není třeba obsluhovat
                 if event.type == pygame_gui.UI_TEXT_ENTRY_CHANGED:
                     pass

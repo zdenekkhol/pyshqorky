@@ -70,4 +70,7 @@ class Players(dict[int, Player]):
             return loaded
         except FileNotFoundError:
             return None # type: ignore
-                
+        
+    def score(self) -> str:
+        """Vrací skóre vítězství pro zobrazení ve tvaru 0 : 0"""
+        return "{} : {}".format(self.__getitem__(Players.PLAYER_1).win_count, self.__getitem__(Players.PLAYER_2).win_count)                
