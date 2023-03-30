@@ -17,7 +17,8 @@ from pyshqorky.board import *
 class Game:
     """
     Třída pro ovládání hry a jejích událostí.
-    Pokud z nějakého neznámého důvodu padá hra na chybu 'Player' nebo 'Players 'object has no attribute 'cokoliv', je třeba vymazat soubor .savegame.
+    Pokud z nějakého neznámého důvodu padá hra na chybu 'Player' nebo 'Players 'object has no attribute 'cokoliv',
+    je třeba vymazat soubor .settings.dmp.
     """
     #: Stav hry: Konec
     STATE_QUIT = 0
@@ -71,7 +72,6 @@ class Game:
     def main(self):
         """
         Vstupní bod po spuštění hry. Nastavení menu, hlavní smyčka hry a vykreslování.
-        
         """
         # okno hlavního menu
         ui_menu = pygame_gui.elements.UIWindow(rect=pygame.Rect((0, 0), (200, 600)), manager=self.manager, window_display_title="Menu", draggable=False)

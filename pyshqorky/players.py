@@ -13,7 +13,8 @@ from pyshqorky.player import *
 
 class Players(dict[int, Player]):
     """
-    Seznam hráčů. Je navržen tak, že hráč jedna má id 1, hráč dva má id -1. Object je děděn ze slovníku, kde index je shodný s id hráče, hodnota je objekt `pyshqorky.player.Player`.
+    Seznam hráčů. Je navržen tak, že hráč jedna má id 1, hráč dva má id -1.
+    Object je děděn ze slovníku, kde index je shodný s id hráče, hodnota je objekt `pyshqorky.player.Player`.
     Na začátku naplníme slovník. Očekávám dva hráče s id 1 a -1.
     """
     #: Id prvího hráče
@@ -46,31 +47,39 @@ class Players(dict[int, Player]):
         """Nastavení nové hry. Začíná hráč číslo jedna"""
         self.id_active = self.PLAYER_1
 
-    def save(self, filename: str = ".savegame") -> None:
+    def save(self, filename: str = ".settings.dmp") -> None:
         """
         Uložení konfigurace hry.
-        Otevřeme soubor filename (defultně .savegame) pro zápis a dumpneme tam tento objekt. Poté za sebou zavřeme.
+        Otevřeme soubor filename (defultně .settings.dmp) pro zápis a dumpneme tam tento objekt. Poté za sebou zavřeme.
         """
         pf = open(filename, "wb")
         pickle.dump(self, pf)
         pf.close()
 
     @staticmethod
-    def load(filename: str = ".savegame") -> Players:
+    def load(filename: str = ".settings.dmp") -> Players:
         """
         Načtení konfigurace hry.
-        Zkusíme otevřít soubor filename (defaultně .savegame) pro čtení.
-        Pokud se povedlo, načteme do proměnné loaded a vrátíme. Očekáváme, že v souboru je instance objektu Players. Na konec po sobě zavřeme.
+        Zkusíme otevřít soubor filename (defaultně .settings.dmp) pro čtení.
+        Pokud se povedlo, načteme do proměnné loaded, vynulujeme počet vítězství a vrátíme.
+        Očekáváme, že v souboru je instance objektu Players. Na konec po sobě zavřeme.
         Pokud se nepovedlo otevřít soubor, vracíme None.
         """
         try:
             pf = open(filename, "rb")
-            loaded = pickle.load(pf)
+            loaded: Players = pickle.load(pf)
             pf.close()
+            loaded.reset_win_count()
             return loaded
         except FileNotFoundError:
             return None # type: ignore
         
     def score(self) -> str:
         """Vrací skóre vítězství pro zobrazení ve tvaru 0 : 0"""
-        return "{} : {}".format(self.__getitem__(Players.PLAYER_1).win_count, self.__getitem__(Players.PLAYER_2).win_count)                
+        return "{} : {}".format(self.__getitem__(Players.PLAYER_1).win_count,
+                                self.__getitem__(Players.PLAYER_2).win_count)
+    
+    def reset_win_count(self) -> None:
+        """Vynuluje počet vítězství pro oba hráče"""
+        for i, p in self.items():
+            p.win_count = 0
