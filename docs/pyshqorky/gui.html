@@ -31,6 +31,9 @@ import pygame_gui
 from  pyshqorky.players import *
 
 class GUI:
+    &#34;&#34;&#34;
+    Třída, která se stará o vykreslování hlavního okna, GUI a obsluhy různých vnořených oken.
+    &#34;&#34;&#34;
     def __init__(self) -&gt; None:
         pygame.init()
         #: Počet FPS pro běh hry = 30
@@ -43,22 +46,26 @@ class GUI:
         self.manager: pygame_gui.UIManager = pygame_gui.UIManager((800, 600))
         #: Hodiny pro sledování času hry
         self.clock: pygame.time.Clock = pygame.time.Clock()
+        
+        #: Okno hlavního menu
+        self.ui_menu = pygame_gui.elements.UIWindow(rect=pygame.Rect((0, 0), (200, 600)), manager=self.manager, window_display_title=&#34;Menu&#34;, draggable=False)
+        # definice tlačítek
+        #: Tlačítko pro novou standardní hru
+        self.btn_new_game = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 10), (100, 50)), text=&#39;New game&#39;, manager=self.manager, container=self.ui_menu, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
+        #: Tlačítko pro novou hru open game
+        self.btn_open_game = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 60), (100, 50)), text=&#39;Open game&#39;, manager=self.manager, container=self.ui_menu, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
+        #: Tlačítko pro nastavení
+        self.btn_settings = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 110), (100, 50)), text=&#34;Settings&#34;, manager=self.manager, container=self.ui_menu, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
+        #: Tlačítko pro konec hry
+        self.btn_quit = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 480), (100, 50)), text=&#39;Quit&#39;, manager=self.manager, container=self.ui_menu, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
+        #: label pro zobrazení počtu vítězství
+        self.lbl_score = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((95, 0), (100, 30)), text=&#34;&#34;,
+                                    manager=self.manager, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
         # Pozadí je černě
         self.screen.fill(pygame.Color(&#39;#000000&#39;))
-
-        # okno hlavního menu
-        self.ui_menu = pygame_gui.elements.UIWindow(rect=pygame.Rect((0, 0), (200, 600)), manager=self.manager, window_display_title=&#34;Menu&#34;, draggable=False)
         # zneaktivnění křížku v menu, aby se nezavřelo
         self.ui_menu.close_window_button = None
-        # definice tlačítek
-        self.btn_run = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 10), (100, 50)), text=&#39;New game&#39;, manager=self.manager, container=self.ui_menu, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
-        self.btn_settings = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 60), (100, 50)), text=&#34;Settings&#34;, manager=self.manager, container=self.ui_menu, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
-        self.btn_quit = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 480), (100, 50)), text=&#39;Quit&#39;, manager=self.manager, container=self.ui_menu, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
-        # label pro počet vítězství
-        self.lbl_score = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((95, 0), (100, 30)),
-                                    text=&#34;&#34;,
-                                    manager=self.manager, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
-        
+
     def time_delta(self) -&gt; float:
         &#34;&#34;&#34;Vypočítání time_delta pro pygame_gui&#34;&#34;&#34;
         # nastavení FPS + časová delta (dle dokumentace důležité pro GUI)
@@ -82,7 +89,9 @@ class GUI:
         run = True
         # kam se začíné kreslit menu nastavení pro hráče 1 a 2 
         player1_y = 10
-        player2_y = 210
+        player2_y = 180
+        other_y = 350
+        y_step = 30
 
         # vytvoříme okno menu nastavení
         ui_settings = pygame_gui.elements.UIWindow(rect=pygame.Rect((30, 30), (300, 560)), manager=self.manager, window_display_title=&#34;Settings&#34;, draggable=False)
@@ -91,42 +100,47 @@ class GUI:
         btn_save = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 440), (100, 50)), text=&#39;Save&#39;, manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
 
         # menu pro hráče 1
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y), (100, 50)), text=&#39;Player 1&#39;,
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y-5), (100, y_step)), text=&#39;Player 1&#39;,
                                     manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+40), (100, 40)), text=&#39;Name:&#39;,
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+(1*y_step)), (100, y_step)), text=&#39;Name:&#39;,
                                     manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        tb_name1 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((-160, player1_y+40), (150, 40)), initial_text=players.get(Players.PLAYER_1).name, #type: ignore
+        tb_name1 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((-160, player1_y+(1*y_step)), (150, y_step)), initial_text=players.get(Players.PLAYER_1).name, #type: ignore
                                                        manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;}) #type: ignore
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+80), (100, 40)), text=&#39;Type:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        dd_type1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+80), (150, 40)), options_list=Player.type_list, #type: ignore
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+(2*y_step)), (100, y_step)), text=&#39;Type:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        dd_type1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+(2*y_step)), (150, y_step)), options_list=Player.type_list, #type: ignore
                                                       starting_option=Player.type_list[players.get(Players.PLAYER_1).type], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+120), (100, 40)), text=&#39;Shape:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        dd_shape1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+120), (150, 40)), options_list=Player.shape_list, #type: ignore
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+(3*y_step)), (100, 40)), text=&#39;Shape:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        dd_shape1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+(3*y_step)), (150, y_step)), options_list=Player.shape_list, #type: ignore
                                                       starting_option=Player.shape_list[players.get(Players.PLAYER_1).shape], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+160), (100, 40)), text=&#39;AI Level:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        dd_ailevel1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+160), (150, 40)), options_list=Player.ai_level_list, #type: ignore
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+(4*y_step)), (100, 40)), text=&#39;AI Level:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        dd_ailevel1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+(4*y_step)), (150, y_step)), options_list=Player.ai_level_list, #type: ignore
                                                       starting_option=Player.ai_level_list[players.get(Players.PLAYER_1).ai_level], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
         # menu pro hráče 2
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+0), (100, 50)), text=&#39;Player 2&#39;, manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+40), (100, 40)), text=&#39;Name:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        tb_name2 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((-160, player2_y+40), (150, 40)), initial_text=players.get(Players.PLAYER_2).name, #type: ignore
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y-5), (100, y_step)), text=&#39;Player 2&#39;, manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+(1*y_step)), (100, y_step)), text=&#39;Name:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        tb_name2 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((-160, player2_y+(1*y_step)), (150, y_step)), initial_text=players.get(Players.PLAYER_2).name, #type: ignore
                                                        manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;}) #type: ignore
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+80), (100, 40)), text=&#39;Type:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        dd_type2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+80), (150, 40)), options_list=Player.type_list, #type: ignore
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+(2*y_step)), (100, y_step)), text=&#39;Type:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        dd_type2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+(2*y_step)), (150, y_step)), options_list=Player.type_list, #type: ignore
                                                       starting_option=Player.type_list[players.get(Players.PLAYER_2).type], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+120), (100, 40)), text=&#39;Shape:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        dd_shape2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+120), (150, 40)), options_list=Player.shape_list, #type: ignore
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+(3*y_step)), (100, y_step)), text=&#39;Shape:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        dd_shape2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+(3*y_step)), (150, y_step)), options_list=Player.shape_list, #type: ignore
                                                       starting_option=Player.shape_list[players.get(Players.PLAYER_2).shape], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+160), (100, 40)), text=&#39;AI Level:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        dd_ailevel2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+160), (150, 40)), options_list=Player.ai_level_list, #type: ignore
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+(4*y_step)), (100, y_step)), text=&#39;AI Level:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        dd_ailevel2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+(4*y_step)), (150, y_step)), options_list=Player.ai_level_list, #type: ignore
                                                       starting_option=Player.ai_level_list[players.get(Players.PLAYER_2).ai_level], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-
+        # menu ostatní
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, other_y-5), (100, y_step)), text=&#39;Misc&#39;, manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, other_y+(1*y_step)), (100, y_step)), text=&#39;Open turns:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        dd_open_turns = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, other_y+(1*y_step)), (150, y_step)), options_list=Player.open_game_turns_list, #type: ignore
+                                                      starting_option=str(players.open_game_turns), #type: ignore
+                                                      manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
 
         # hlavní obslužná smyčka - dokud jsme ve stavu menu nastavení
         while run:
@@ -151,6 +165,7 @@ class GUI:
                         players.get(Players.PLAYER_2).type = Player.type_list.index(dd_type2.selected_option) # type: ignore
                         players.get(Players.PLAYER_1).ai_level = Player.ai_level_list.index(dd_ailevel1.selected_option) # type: ignore
                         players.get(Players.PLAYER_2).ai_level = Player.ai_level_list.index(dd_ailevel2.selected_option) # type: ignore
+                        players.open_game_turns = int(dd_open_turns.selected_option)
                         # uložíme do souboru pro perzistentní uchování
                         players.save()
                         # vrátíme se do předchozího módu
@@ -172,12 +187,11 @@ class GUI:
         &#34;&#34;&#34;
         Modální dialogové okno pro upozornění nebo otázku s odpovědí OK / Cancel
         &#34;&#34;&#34;
-        run = True
-        ret = False
+        ret: bool | None = None
         # Vytvoříme modální dialog
         cdialog = pygame_gui.windows.UIConfirmationDialog(rect=pygame.Rect(position, size),
                     action_long_desc=message, manager=self.manager, window_title=title, blocking=True, )
-        while run:
+        while ret is None:
             # nastavení FPS + časová delta (dle dokumentace důležité pro GUI)
             time_delta = self.time_delta()
             # zpracujeme eventy
@@ -186,25 +200,25 @@ class GUI:
                 # ESC = jako Cancel
                 if event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE:
                     ret = False
-                    run = False
+                # Enter = jako OK
+                if event.type == pygame.KEYUP and event.key == pygame.K_RETURN:
+                    ret = True
                 # eventy GUI - co se nás týká
                 if cdialog.process_event(event) == True:
                     # zmáčkli jsme confirm
                     if cdialog.confirm_button.hovered:
                         print(&#34;zmackli jsme confirm&#34;)
                         ret = True
-                        run = False
                     # zmáčkli jame cancel nebo zavřít okno
                     if cdialog.cancel_button.hovered or cdialog.close_window_button.hovered: #type: ignore
                         print(&#34;cancel&#34;)
                         ret = False
-                        run = False
                     
             # vykreslíme GUI (podle dokumentace a testů musí být právě tady, aby fungovalo správně)
             self.draw(time_delta)
 
         cdialog.hide()
-        return ret    </code></pre>
+        return ret</code></pre>
 </details>
 </section>
 <section>
@@ -220,12 +234,15 @@ class GUI:
 <span>class <span class="ident">GUI</span></span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Třída, která se stará o vykreslování hlavního okna, GUI a obsluhy různých vnořených oken.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">class GUI:
+    &#34;&#34;&#34;
+    Třída, která se stará o vykreslování hlavního okna, GUI a obsluhy různých vnořených oken.
+    &#34;&#34;&#34;
     def __init__(self) -&gt; None:
         pygame.init()
         #: Počet FPS pro běh hry = 30
@@ -238,22 +255,26 @@ class GUI:
         self.manager: pygame_gui.UIManager = pygame_gui.UIManager((800, 600))
         #: Hodiny pro sledování času hry
         self.clock: pygame.time.Clock = pygame.time.Clock()
+        
+        #: Okno hlavního menu
+        self.ui_menu = pygame_gui.elements.UIWindow(rect=pygame.Rect((0, 0), (200, 600)), manager=self.manager, window_display_title=&#34;Menu&#34;, draggable=False)
+        # definice tlačítek
+        #: Tlačítko pro novou standardní hru
+        self.btn_new_game = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 10), (100, 50)), text=&#39;New game&#39;, manager=self.manager, container=self.ui_menu, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
+        #: Tlačítko pro novou hru open game
+        self.btn_open_game = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 60), (100, 50)), text=&#39;Open game&#39;, manager=self.manager, container=self.ui_menu, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
+        #: Tlačítko pro nastavení
+        self.btn_settings = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 110), (100, 50)), text=&#34;Settings&#34;, manager=self.manager, container=self.ui_menu, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
+        #: Tlačítko pro konec hry
+        self.btn_quit = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 480), (100, 50)), text=&#39;Quit&#39;, manager=self.manager, container=self.ui_menu, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
+        #: label pro zobrazení počtu vítězství
+        self.lbl_score = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((95, 0), (100, 30)), text=&#34;&#34;,
+                                    manager=self.manager, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
         # Pozadí je černě
         self.screen.fill(pygame.Color(&#39;#000000&#39;))
-
-        # okno hlavního menu
-        self.ui_menu = pygame_gui.elements.UIWindow(rect=pygame.Rect((0, 0), (200, 600)), manager=self.manager, window_display_title=&#34;Menu&#34;, draggable=False)
         # zneaktivnění křížku v menu, aby se nezavřelo
         self.ui_menu.close_window_button = None
-        # definice tlačítek
-        self.btn_run = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 10), (100, 50)), text=&#39;New game&#39;, manager=self.manager, container=self.ui_menu, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
-        self.btn_settings = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 60), (100, 50)), text=&#34;Settings&#34;, manager=self.manager, container=self.ui_menu, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
-        self.btn_quit = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 480), (100, 50)), text=&#39;Quit&#39;, manager=self.manager, container=self.ui_menu, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
-        # label pro počet vítězství
-        self.lbl_score = pygame_gui.elements.UILabel(relative_rect=pygame.Rect((95, 0), (100, 30)),
-                                    text=&#34;&#34;,
-                                    manager=self.manager, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
-        
+
     def time_delta(self) -&gt; float:
         &#34;&#34;&#34;Vypočítání time_delta pro pygame_gui&#34;&#34;&#34;
         # nastavení FPS + časová delta (dle dokumentace důležité pro GUI)
@@ -277,7 +298,9 @@ class GUI:
         run = True
         # kam se začíné kreslit menu nastavení pro hráče 1 a 2 
         player1_y = 10
-        player2_y = 210
+        player2_y = 180
+        other_y = 350
+        y_step = 30
 
         # vytvoříme okno menu nastavení
         ui_settings = pygame_gui.elements.UIWindow(rect=pygame.Rect((30, 30), (300, 560)), manager=self.manager, window_display_title=&#34;Settings&#34;, draggable=False)
@@ -286,42 +309,47 @@ class GUI:
         btn_save = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 440), (100, 50)), text=&#39;Save&#39;, manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
 
         # menu pro hráče 1
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y), (100, 50)), text=&#39;Player 1&#39;,
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y-5), (100, y_step)), text=&#39;Player 1&#39;,
                                     manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+40), (100, 40)), text=&#39;Name:&#39;,
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+(1*y_step)), (100, y_step)), text=&#39;Name:&#39;,
                                     manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        tb_name1 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((-160, player1_y+40), (150, 40)), initial_text=players.get(Players.PLAYER_1).name, #type: ignore
+        tb_name1 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((-160, player1_y+(1*y_step)), (150, y_step)), initial_text=players.get(Players.PLAYER_1).name, #type: ignore
                                                        manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;}) #type: ignore
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+80), (100, 40)), text=&#39;Type:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        dd_type1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+80), (150, 40)), options_list=Player.type_list, #type: ignore
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+(2*y_step)), (100, y_step)), text=&#39;Type:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        dd_type1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+(2*y_step)), (150, y_step)), options_list=Player.type_list, #type: ignore
                                                       starting_option=Player.type_list[players.get(Players.PLAYER_1).type], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+120), (100, 40)), text=&#39;Shape:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        dd_shape1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+120), (150, 40)), options_list=Player.shape_list, #type: ignore
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+(3*y_step)), (100, 40)), text=&#39;Shape:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        dd_shape1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+(3*y_step)), (150, y_step)), options_list=Player.shape_list, #type: ignore
                                                       starting_option=Player.shape_list[players.get(Players.PLAYER_1).shape], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+160), (100, 40)), text=&#39;AI Level:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        dd_ailevel1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+160), (150, 40)), options_list=Player.ai_level_list, #type: ignore
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+(4*y_step)), (100, 40)), text=&#39;AI Level:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        dd_ailevel1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+(4*y_step)), (150, y_step)), options_list=Player.ai_level_list, #type: ignore
                                                       starting_option=Player.ai_level_list[players.get(Players.PLAYER_1).ai_level], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
         # menu pro hráče 2
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+0), (100, 50)), text=&#39;Player 2&#39;, manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+40), (100, 40)), text=&#39;Name:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        tb_name2 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((-160, player2_y+40), (150, 40)), initial_text=players.get(Players.PLAYER_2).name, #type: ignore
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y-5), (100, y_step)), text=&#39;Player 2&#39;, manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+(1*y_step)), (100, y_step)), text=&#39;Name:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        tb_name2 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((-160, player2_y+(1*y_step)), (150, y_step)), initial_text=players.get(Players.PLAYER_2).name, #type: ignore
                                                        manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;}) #type: ignore
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+80), (100, 40)), text=&#39;Type:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        dd_type2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+80), (150, 40)), options_list=Player.type_list, #type: ignore
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+(2*y_step)), (100, y_step)), text=&#39;Type:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        dd_type2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+(2*y_step)), (150, y_step)), options_list=Player.type_list, #type: ignore
                                                       starting_option=Player.type_list[players.get(Players.PLAYER_2).type], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+120), (100, 40)), text=&#39;Shape:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        dd_shape2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+120), (150, 40)), options_list=Player.shape_list, #type: ignore
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+(3*y_step)), (100, y_step)), text=&#39;Shape:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        dd_shape2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+(3*y_step)), (150, y_step)), options_list=Player.shape_list, #type: ignore
                                                       starting_option=Player.shape_list[players.get(Players.PLAYER_2).shape], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+160), (100, 40)), text=&#39;AI Level:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-        dd_ailevel2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+160), (150, 40)), options_list=Player.ai_level_list, #type: ignore
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+(4*y_step)), (100, y_step)), text=&#39;AI Level:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        dd_ailevel2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+(4*y_step)), (150, y_step)), options_list=Player.ai_level_list, #type: ignore
                                                       starting_option=Player.ai_level_list[players.get(Players.PLAYER_2).ai_level], #type: ignore
                                                       manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-
+        # menu ostatní
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, other_y-5), (100, y_step)), text=&#39;Misc&#39;, manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
+        pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, other_y+(1*y_step)), (100, y_step)), text=&#39;Open turns:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+        dd_open_turns = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, other_y+(1*y_step)), (150, y_step)), options_list=Player.open_game_turns_list, #type: ignore
+                                                      starting_option=str(players.open_game_turns), #type: ignore
+                                                      manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
 
         # hlavní obslužná smyčka - dokud jsme ve stavu menu nastavení
         while run:
@@ -346,6 +374,7 @@ class GUI:
                         players.get(Players.PLAYER_2).type = Player.type_list.index(dd_type2.selected_option) # type: ignore
                         players.get(Players.PLAYER_1).ai_level = Player.ai_level_list.index(dd_ailevel1.selected_option) # type: ignore
                         players.get(Players.PLAYER_2).ai_level = Player.ai_level_list.index(dd_ailevel2.selected_option) # type: ignore
+                        players.open_game_turns = int(dd_open_turns.selected_option)
                         # uložíme do souboru pro perzistentní uchování
                         players.save()
                         # vrátíme se do předchozího módu
@@ -367,12 +396,11 @@ class GUI:
         &#34;&#34;&#34;
         Modální dialogové okno pro upozornění nebo otázku s odpovědí OK / Cancel
         &#34;&#34;&#34;
-        run = True
-        ret = False
+        ret: bool | None = None
         # Vytvoříme modální dialog
         cdialog = pygame_gui.windows.UIConfirmationDialog(rect=pygame.Rect(position, size),
                     action_long_desc=message, manager=self.manager, window_title=title, blocking=True, )
-        while run:
+        while ret is None:
             # nastavení FPS + časová delta (dle dokumentace důležité pro GUI)
             time_delta = self.time_delta()
             # zpracujeme eventy
@@ -381,28 +409,44 @@ class GUI:
                 # ESC = jako Cancel
                 if event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE:
                     ret = False
-                    run = False
+                # Enter = jako OK
+                if event.type == pygame.KEYUP and event.key == pygame.K_RETURN:
+                    ret = True
                 # eventy GUI - co se nás týká
                 if cdialog.process_event(event) == True:
                     # zmáčkli jsme confirm
                     if cdialog.confirm_button.hovered:
                         print(&#34;zmackli jsme confirm&#34;)
                         ret = True
-                        run = False
                     # zmáčkli jame cancel nebo zavřít okno
                     if cdialog.cancel_button.hovered or cdialog.close_window_button.hovered: #type: ignore
                         print(&#34;cancel&#34;)
                         ret = False
-                        run = False
                     
             # vykreslíme GUI (podle dokumentace a testů musí být právě tady, aby fungovalo správně)
             self.draw(time_delta)
 
         cdialog.hide()
-        return ret    </code></pre>
+        return ret</code></pre>
 </details>
 <h3>Instance variables</h3>
 <dl>
+<dt id="pyshqorky.gui.GUI.btn_new_game"><code class="name">var <span class="ident">btn_new_game</span></code></dt>
+<dd>
+<div class="desc"><p>Tlačítko pro novou standardní hru</p></div>
+</dd>
+<dt id="pyshqorky.gui.GUI.btn_open_game"><code class="name">var <span class="ident">btn_open_game</span></code></dt>
+<dd>
+<div class="desc"><p>Tlačítko pro novou hru open game</p></div>
+</dd>
+<dt id="pyshqorky.gui.GUI.btn_quit"><code class="name">var <span class="ident">btn_quit</span></code></dt>
+<dd>
+<div class="desc"><p>Tlačítko pro konec hry</p></div>
+</dd>
+<dt id="pyshqorky.gui.GUI.btn_settings"><code class="name">var <span class="ident">btn_settings</span></code></dt>
+<dd>
+<div class="desc"><p>Tlačítko pro nastavení</p></div>
+</dd>
 <dt id="pyshqorky.gui.GUI.clock"><code class="name">var <span class="ident">clock</span></code></dt>
 <dd>
 <div class="desc"><p>Hodiny pro sledování času hry</p></div>
@@ -415,6 +459,10 @@ class GUI:
 <dd>
 <div class="desc"><p>Počet FPS pro běh hry = 30</p></div>
 </dd>
+<dt id="pyshqorky.gui.GUI.lbl_score"><code class="name">var <span class="ident">lbl_score</span></code></dt>
+<dd>
+<div class="desc"><p>label pro zobrazení počtu vítězství</p></div>
+</dd>
 <dt id="pyshqorky.gui.GUI.manager"><code class="name">var <span class="ident">manager</span></code></dt>
 <dd>
 <div class="desc"><p>Manažer GUI rozhranní</p></div>
@@ -422,6 +470,10 @@ class GUI:
 <dt id="pyshqorky.gui.GUI.screen"><code class="name">var <span class="ident">screen</span></code></dt>
 <dd>
 <div class="desc"><p>Na co kreslíme.</p></div>
+</dd>
+<dt id="pyshqorky.gui.GUI.ui_menu"><code class="name">var <span class="ident">ui_menu</span></code></dt>
+<dd>
+<div class="desc"><p>Okno hlavního menu</p></div>
 </dd>
 </dl>
 <h3>Methods</h3>
@@ -463,7 +515,9 @@ class GUI:
     run = True
     # kam se začíné kreslit menu nastavení pro hráče 1 a 2 
     player1_y = 10
-    player2_y = 210
+    player2_y = 180
+    other_y = 350
+    y_step = 30
 
     # vytvoříme okno menu nastavení
     ui_settings = pygame_gui.elements.UIWindow(rect=pygame.Rect((30, 30), (300, 560)), manager=self.manager, window_display_title=&#34;Settings&#34;, draggable=False)
@@ -472,42 +526,47 @@ class GUI:
     btn_save = pygame_gui.elements.UIButton(relative_rect=pygame.Rect((0, 440), (100, 50)), text=&#39;Save&#39;, manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
 
     # menu pro hráče 1
-    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y), (100, 50)), text=&#39;Player 1&#39;,
+    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y-5), (100, y_step)), text=&#39;Player 1&#39;,
                                 manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
-    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+40), (100, 40)), text=&#39;Name:&#39;,
+    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+(1*y_step)), (100, y_step)), text=&#39;Name:&#39;,
                                 manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-    tb_name1 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((-160, player1_y+40), (150, 40)), initial_text=players.get(Players.PLAYER_1).name, #type: ignore
+    tb_name1 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((-160, player1_y+(1*y_step)), (150, y_step)), initial_text=players.get(Players.PLAYER_1).name, #type: ignore
                                                    manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;}) #type: ignore
-    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+80), (100, 40)), text=&#39;Type:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-    dd_type1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+80), (150, 40)), options_list=Player.type_list, #type: ignore
+    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+(2*y_step)), (100, y_step)), text=&#39;Type:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+    dd_type1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+(2*y_step)), (150, y_step)), options_list=Player.type_list, #type: ignore
                                                   starting_option=Player.type_list[players.get(Players.PLAYER_1).type], #type: ignore
                                                   manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+120), (100, 40)), text=&#39;Shape:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-    dd_shape1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+120), (150, 40)), options_list=Player.shape_list, #type: ignore
+    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+(3*y_step)), (100, 40)), text=&#39;Shape:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+    dd_shape1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+(3*y_step)), (150, y_step)), options_list=Player.shape_list, #type: ignore
                                                   starting_option=Player.shape_list[players.get(Players.PLAYER_1).shape], #type: ignore
                                                   manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+160), (100, 40)), text=&#39;AI Level:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-    dd_ailevel1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+160), (150, 40)), options_list=Player.ai_level_list, #type: ignore
+    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player1_y+(4*y_step)), (100, 40)), text=&#39;AI Level:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+    dd_ailevel1 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player1_y+(4*y_step)), (150, y_step)), options_list=Player.ai_level_list, #type: ignore
                                                   starting_option=Player.ai_level_list[players.get(Players.PLAYER_1).ai_level], #type: ignore
                                                   manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
     # menu pro hráče 2
-    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+0), (100, 50)), text=&#39;Player 2&#39;, manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
-    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+40), (100, 40)), text=&#39;Name:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-    tb_name2 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((-160, player2_y+40), (150, 40)), initial_text=players.get(Players.PLAYER_2).name, #type: ignore
+    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y-5), (100, y_step)), text=&#39;Player 2&#39;, manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
+    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+(1*y_step)), (100, y_step)), text=&#39;Name:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+    tb_name2 = pygame_gui.elements.UITextEntryLine(relative_rect=pygame.Rect((-160, player2_y+(1*y_step)), (150, y_step)), initial_text=players.get(Players.PLAYER_2).name, #type: ignore
                                                    manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;}) #type: ignore
-    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+80), (100, 40)), text=&#39;Type:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-    dd_type2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+80), (150, 40)), options_list=Player.type_list, #type: ignore
+    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+(2*y_step)), (100, y_step)), text=&#39;Type:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+    dd_type2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+(2*y_step)), (150, y_step)), options_list=Player.type_list, #type: ignore
                                                   starting_option=Player.type_list[players.get(Players.PLAYER_2).type], #type: ignore
                                                   manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+120), (100, 40)), text=&#39;Shape:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-    dd_shape2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+120), (150, 40)), options_list=Player.shape_list, #type: ignore
+    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+(3*y_step)), (100, y_step)), text=&#39;Shape:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+    dd_shape2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+(3*y_step)), (150, y_step)), options_list=Player.shape_list, #type: ignore
                                                   starting_option=Player.shape_list[players.get(Players.PLAYER_2).shape], #type: ignore
                                                   manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+160), (100, 40)), text=&#39;AI Level:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
-    dd_ailevel2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+160), (150, 40)), options_list=Player.ai_level_list, #type: ignore
+    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, player2_y+(4*y_step)), (100, y_step)), text=&#39;AI Level:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+    dd_ailevel2 = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, player2_y+(4*y_step)), (150, y_step)), options_list=Player.ai_level_list, #type: ignore
                                                   starting_option=Player.ai_level_list[players.get(Players.PLAYER_2).ai_level], #type: ignore
                                                   manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
-
+    # menu ostatní
+    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, other_y-5), (100, y_step)), text=&#39;Misc&#39;, manager=self.manager, container=ui_settings, anchors={&#39;centerx&#39;: &#39;centerx&#39;})
+    pygame_gui.elements.UILabel(relative_rect=pygame.Rect((0, other_y+(1*y_step)), (100, y_step)), text=&#39;Open turns:&#39;, manager=self.manager, container=ui_settings, anchors={&#39;left&#39;: &#39;left&#39;})
+    dd_open_turns = pygame_gui.elements.UIDropDownMenu(relative_rect=pygame.Rect((-160, other_y+(1*y_step)), (150, y_step)), options_list=Player.open_game_turns_list, #type: ignore
+                                                  starting_option=str(players.open_game_turns), #type: ignore
+                                                  manager=self.manager, container=ui_settings, anchors={&#39;right&#39;: &#39;right&#39;})
 
     # hlavní obslužná smyčka - dokud jsme ve stavu menu nastavení
     while run:
@@ -532,6 +591,7 @@ class GUI:
                     players.get(Players.PLAYER_2).type = Player.type_list.index(dd_type2.selected_option) # type: ignore
                     players.get(Players.PLAYER_1).ai_level = Player.ai_level_list.index(dd_ailevel1.selected_option) # type: ignore
                     players.get(Players.PLAYER_2).ai_level = Player.ai_level_list.index(dd_ailevel2.selected_option) # type: ignore
+                    players.open_game_turns = int(dd_open_turns.selected_option)
                     # uložíme do souboru pro perzistentní uchování
                     players.save()
                     # vrátíme se do předchozího módu
@@ -563,12 +623,11 @@ class GUI:
     &#34;&#34;&#34;
     Modální dialogové okno pro upozornění nebo otázku s odpovědí OK / Cancel
     &#34;&#34;&#34;
-    run = True
-    ret = False
+    ret: bool | None = None
     # Vytvoříme modální dialog
     cdialog = pygame_gui.windows.UIConfirmationDialog(rect=pygame.Rect(position, size),
                 action_long_desc=message, manager=self.manager, window_title=title, blocking=True, )
-    while run:
+    while ret is None:
         # nastavení FPS + časová delta (dle dokumentace důležité pro GUI)
         time_delta = self.time_delta()
         # zpracujeme eventy
@@ -577,25 +636,25 @@ class GUI:
             # ESC = jako Cancel
             if event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE:
                 ret = False
-                run = False
+            # Enter = jako OK
+            if event.type == pygame.KEYUP and event.key == pygame.K_RETURN:
+                ret = True
             # eventy GUI - co se nás týká
             if cdialog.process_event(event) == True:
                 # zmáčkli jsme confirm
                 if cdialog.confirm_button.hovered:
                     print(&#34;zmackli jsme confirm&#34;)
                     ret = True
-                    run = False
                 # zmáčkli jame cancel nebo zavřít okno
                 if cdialog.cancel_button.hovered or cdialog.close_window_button.hovered: #type: ignore
                     print(&#34;cancel&#34;)
                     ret = False
-                    run = False
                 
         # vykreslíme GUI (podle dokumentace a testů musí být právě tady, aby fungovalo správně)
         self.draw(time_delta)
 
     cdialog.hide()
-    return ret    </code></pre>
+    return ret</code></pre>
 </details>
 </dd>
 <dt id="pyshqorky.gui.GUI.time_delta"><code class="name flex">
@@ -634,15 +693,21 @@ class GUI:
 <li>
 <h4><code><a title="pyshqorky.gui.GUI" href="#pyshqorky.gui.GUI">GUI</a></code></h4>
 <ul class="two-column">
+<li><code><a title="pyshqorky.gui.GUI.btn_new_game" href="#pyshqorky.gui.GUI.btn_new_game">btn_new_game</a></code></li>
+<li><code><a title="pyshqorky.gui.GUI.btn_open_game" href="#pyshqorky.gui.GUI.btn_open_game">btn_open_game</a></code></li>
+<li><code><a title="pyshqorky.gui.GUI.btn_quit" href="#pyshqorky.gui.GUI.btn_quit">btn_quit</a></code></li>
+<li><code><a title="pyshqorky.gui.GUI.btn_settings" href="#pyshqorky.gui.GUI.btn_settings">btn_settings</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.clock" href="#pyshqorky.gui.GUI.clock">clock</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.display" href="#pyshqorky.gui.GUI.display">display</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.draw" href="#pyshqorky.gui.GUI.draw">draw</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.fps" href="#pyshqorky.gui.GUI.fps">fps</a></code></li>
+<li><code><a title="pyshqorky.gui.GUI.lbl_score" href="#pyshqorky.gui.GUI.lbl_score">lbl_score</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.manager" href="#pyshqorky.gui.GUI.manager">manager</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.menu_settings" href="#pyshqorky.gui.GUI.menu_settings">menu_settings</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.message_box" href="#pyshqorky.gui.GUI.message_box">message_box</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.screen" href="#pyshqorky.gui.GUI.screen">screen</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.time_delta" href="#pyshqorky.gui.GUI.time_delta">time_delta</a></code></li>
+<li><code><a title="pyshqorky.gui.GUI.ui_menu" href="#pyshqorky.gui.GUI.ui_menu">ui_menu</a></code></li>
 </ul>
 </li>
 </ul>

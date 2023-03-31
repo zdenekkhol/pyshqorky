@@ -22,12 +22,13 @@ class Players(dict[int, Player]):
     #: Id druhého hráče
     PLAYER_2 = -1 
 
-    def __init__(self, dict: dict[int, Player]):
+    def __init__(self, new_dict: dict[int, Player]):
         #: Id právě hrajícího hráče.
         self.id_active: int = self.PLAYER_1
-        
+        #: Počet kol pro open game, implicitně 5
+        self.open_game_turns = 5
         # a voláme konstruktor rodiče
-        super().__init__(dict)
+        super().__init__(new_dict)
 
     @property
     def active(self) -> Player:

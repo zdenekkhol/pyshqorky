@@ -31,6 +31,8 @@ class Player:
     AI_LVL_DEFENSIVE = 2
     #: Úroveň hry počítače: ještě defenzivnější
     AI_LVL_ULTRADEFENS = 3
+    #: Úroveň hry počítače: skrytá, pouze pro mód open game
+    AI_LVL_OPEN_GAME = 4
     
     #: Číslo seznamu pro úroveň hry počítače: moje
     AI_SCORE_MY = 0
@@ -44,7 +46,9 @@ class Player:
     AI_VALUES = {0: ([0, 10, 100, 1000, 10000, 100000], [0, 20, 200, 2000, 20000, 200000]),
                  1: ([0, 10, 100, 1000, 10000, 100000], [0, 50, 500, 5000, 50000, 500000]),
                  2: ([0, 10, 100, 1000, 10000, 100000], [0, 100, 1000, 10000, 100000, 1000000]),
-                 3: ([0, 10, 100, 1000, 2000, 100000], [0, 100, 1000, 10000, 20000, 1000000])}
+                 3: ([0, 10, 100, 1000, 2000, 100000], [0, 100, 1000, 10000, 20000, 1000000]),
+                 4: ([0, 10, 100, 1000, 0, 0], [0, 100, 1000, 10000, 20000, 1000000])
+                }
 
     #: Seznam hodnot typu hráče
     type_list = ("Human", "AI")
@@ -52,7 +56,9 @@ class Player:
     shape_list = ("Square", "Circle", "Symbol")
     #: Seznam hodnot úrovně hry počítače
     ai_level_list = ("Agressive", "Balanced", "Defensive", "Ultra defensive")
-    
+    #: Seznam hodnot tahů pro open game
+    open_game_turns_list = {str(i+3) for i in range(8)}
+    open_game_turns_list = {"3", "4", "5", "6", "8", "10"}
     def __init__(self, id: int, name: str, color: tuple, shape: int = SHAPE_SQUARE, ai_level:int = AI_LVL_BALANCED, type: int = TYPE_HUMAN) -> None:
         #: id hráče (navrženo tak, že bude nabývat pouze hodnot 1 a -1)
         self.id = id

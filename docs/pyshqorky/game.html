@@ -54,6 +54,7 @@ class Game
 
 import pygame
 import pygame_gui
+import copy
 from pyshqorky.players import *
 from pyshqorky.board import *
 from pyshqorky.gui import *
@@ -68,20 +69,33 @@ class Game:
     STATE_QUIT = 0
     #: Stav hry: Hlavní menu
     STATE_MENU_MAIN = 1
-    #: Stav hry: Menu nastavení
-    STATE_MENU_SETTINGS = 2
     #: Stav hry: Běh hry (tahu)
-    STATE_GAME_RUN = 3
+    STATE_GAME_RUN = 2
     #: Stav hry: Konec tahu
-    STATE_GAME_END_TURN = 4
+    STATE_GAME_END_MOVE = 3
+    #: Stav hry: Konec kola
+    STATE_GAME_END_ROUND = 4
+    #: Stav hry: Inicializace open game
+    STATE_OPEN_GAME_INIT = 5
+    #: Stav hry: Zahájení open game
+    STATE_OPEN_GAME_OPEN = 6
+
+    #: Mód hry: normální
+    MODE_STANDARD = 0
+    # Mód hry: hra k dokončení
+    MODE_OPEN_GAME = 1
 
     def __init__(self):
         #: Stav hry. Na začátku se spouští do hlavního menu.
-        self.state: int = self.STATE_MENU_MAIN
+        self.state: int = Game.STATE_MENU_MAIN
+        #: Mód hry.
+        self.mode: int = Game.MODE_STANDARD
         #: Seznam polí, která budou zvýrazněna (další tah počítače nebo výhra)
         self.mark_coords: list[tuple[int, int]] | None = None
-        #: vytvoříme GUI
+        #: Vytvoříme GUI pro menu a vykreslování
         self.gui = GUI()
+        # A jmenuju se Pyshqorky
+        pygame.display.set_caption(&#34;Pyshqorky&#34;)
         #: Hrací deska o velikosti 15x15 polí, 525x525 px, offset pro vykreslení do okna je 235x35 px
         self.board: Board = Board(15, 15, 525, 525, 235, 35)
         #: Seznam hráčů s implicitním nastavením.
@@ -89,10 +103,6 @@ class Game:
             Players.PLAYER_1: Player(id=Players.PLAYER_1, name=&#34;Human&#34;, color=(255, 64, 64), shape=Player.SHAPE_SQUARE, type=Player.TYPE_HUMAN, ai_level=Player.AI_LVL_BALANCED), 
             Players.PLAYER_2: Player(id=Players.PLAYER_2, name=&#34;Computer&#34;, color=(64, 64, 255), shape=Player.SHAPE_CIRCLE, type=Player.TYPE_AI, ai_level=Player.AI_LVL_BALANCED)
             })
-
-        # A jmenuju se Pyshqorky
-        pygame.display.set_caption(&#34;Pyshqorky&#34;)
-
         # Pokud jsme nedokázali nahrát uložené nastavení
         if Players.load() == None:
             # tak uložíme to aktuální jako základ
@@ -103,88 +113,29 @@ class Game:
 
     def main(self):
         &#34;&#34;&#34;
-        Vstupní bod po spuštění hry. Nastavení menu, hlavní smyčka hry a vykreslování.
+        Vstupní bod po spuštění hry. Hlavní smyčka hry.
         &#34;&#34;&#34;
+        msg: str = &#34;&#34;
+        og_moves: int = 20
+        players_backup: Players = Players({})
         # hlavní smyčka hry
         while self.state &gt; Game.STATE_QUIT:
             # nastavení FPS + časová delta (dle dokumentace důležité pro GUI)
             time_delta = self.gui.clock.tick(self.gui.fps)/1000.0
-            # zpracujeme eventy
-            for event in pygame.event.get():
-                # křížkem nebo zmáčknutím q je konec
-                if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_q):
-                    self.state = Game.STATE_QUIT
-                # event GUI - zmáčkli jsme tlačítko myši
-                if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                    # okud je to nová hra
-                    if event.ui_element == self.gui.btn_run:
-                        # a jsme v menu
-                        if self.state == self.STATE_MENU_MAIN:
-                            # pustíme ji rovnou
-                            self.run_new_game()
-                        else:
-                            # jinak se zeptáme, jestli chce hru od začátku
-                            if self.gui.message_box(&#34;Abandon this game and start again?&#34;) == True:
-                                # Pokud ano, tak jedeme
-                                self.run_new_game()
-                        # přepneme do stavu běhu hry
-                        self.state = self.STATE_GAME_RUN
-                        # resetujeme hráče a hrací desku do nastavení pro začátek hry
-                        self.players.reset()
-                        self.board.reset()
-                        self.mark_coords = None
-                        # neumožníme znovuspustit hru, pokud běží
-                        #self.gui.btn_run.disable()
-                    # zobrazíme nastavení
-                    if event.ui_element == self.gui.btn_settings:
-                        print(&#34;Settings&#34;)
-                        # zakážeme hlavní menu
-                        self.gui.ui_menu.disable()
-                        # spustíme okno nastavení
-                        if self.gui.menu_settings(self.players) == True:
-                            # pokud vrátilo True, uložíme
-                            self.players.save()
-                        # povolíme hlavní menu
-                        self.gui.ui_menu.enable()
-                    # končíme?
-                    if event.ui_element == self.gui.btn_quit or (event.type == pygame.KEYUP and event.key == pygame.K_q):
-                        if self.gui.message_box(message = &#34;Are you sure?&#34;) == True:
-                            self.state = Game.STATE_QUIT
-                # ostatní GUI eventy
-                self.gui.manager.process_events(event)
-                # kliknutí myší hlavním tlačítkem
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    # tah hráče
-                    for r in range (self.board.rows):
-                        for c in range(self.board.cols):
-                            # kliknul na hrací desku?
-                            if self.board.btns[r][c].collidepoint(pygame.mouse.get_pos()): # type: ignore
-                                print(&#34;Klik na &#34; + str(r) + &#34;:&#34; + str(c))
-                                # jestli je tu prázdno
-                                if self.board.grid[r][c] == Board.CELL_EMPTY:
-                                    # pokud je hráč člověk a hra běží
-                                    if self.players.active.type == Player.TYPE_HUMAN and self.state == Game.STATE_GAME_RUN:
-                                        # tak řekneme desce, že táhnul tam kam kliknul
-                                        self.board.make_move(self.players.active, (r, c))
-                                        # konec zvýrazňování
-                                        self.mark_coords = None
-                                        # stav je konec tahu
-                                        self.state = Game.STATE_GAME_END_TURN
-
-            # je hráč AI a hra běží?
-            if self.players.active.type == Player.TYPE_AI and self.state == Game.STATE_GAME_RUN:
-                # další tah je právě sem
-                next_move = self.board.best_move(self.players.active)
-                # proveď ten tah
-                self.board.make_move(self.players.active, next_move)
-                # zvýrazníme tento tah
-                self.mark_coords = list()
-                self.mark_coords.append(next_move)
-                # stav je konec tahu
-                self.state = Game.STATE_GAME_END_TURN
+            
+            # je stav konec kola?
+            if self.state == Game.STATE_GAME_END_ROUND:
+                # zeptáme se, jestli pokračovat
+                # správnou otázku jsme si připravili předem
+                if self.gui.message_box(msg + &#34; Do you want to play next round?&#34;):
+                    # pokud ano, jedem dál
+                    self.run_new_round()
+                else:
+                    # jinak menu
+                    self.state = Game.STATE_MENU_MAIN
 
             # je stav konec tahu? vyhodnocení a přepnutí
-            if self.state == Game.STATE_GAME_END_TURN:
+            if self.state == Game.STATE_GAME_END_MOVE:
                 # co nám vrátí wintie?
                 wt_state, to_mark = self.board.win_tie(self.players.active)
                 # Není výhra, prohra ani remíza
@@ -215,36 +166,144 @@ class Game:
                             msg = &#34;Game is tie.&#34;
                     # Aktualizace skóre
                     self.gui.lbl_score.set_text(self.players.score())
-                    # zeptáme se, jestli pokračovat
-                    # správnou otázku jsme si připravili předem
-                    if self.gui.message_box(msg + &#34; Do you want to play next round?&#34;):
-                        # pokud ano, jedem dál
-                        self.run_new_round()
-                    else:
-                        # jinak menu
-                        self.state = Game.STATE_MENU_MAIN
+                    self.state = Game.STATE_GAME_END_ROUND
+            
+            # je stav inicializace open game?
+            if self.state == Game.STATE_OPEN_GAME_INIT:
+                og_moves = 20
+                # zazálohujeme si players
+                players_backup = copy.deepcopy(self.players)
+                # nastavíme typ hráče na AI 
+                self.players.active.type = Player.TYPE_AI
+                self.players.oponent.type = Player.TYPE_AI
+                # nastavíme ai level open game
+                self.players.active.ai_level = Player.AI_LVL_OPEN_GAME
+                self.players.oponent.ai_level = Player.AI_LVL_OPEN_GAME
+                # jdeme zahajovat
+                self.state = Game.STATE_OPEN_GAME_OPEN
+            # je stav zahájení open game?
+            if self.state == Game.STATE_OPEN_GAME_OPEN:
+                # další tah je právě sem
+                next_move = self.board.best_move(self.players.active)
+                # proveď ten tah
+                self.board.make_move(self.players.active, next_move)
+                # přepneme hráče
+                self.players.next()
+                og_moves -= 1
+                if og_moves == 0:
+                    self.state = Game.STATE_GAME_RUN
+                    # vrátíme tam původní hodnoty
+                    self.players = copy.deepcopy(players_backup)
+            # zpracujeme eventy
+            for event in pygame.event.get():
+                # křížkem nebo zmáčknutím q je konec
+                if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_q):
+                    self.state = Game.STATE_QUIT
+                if event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE:
+                    if self.gui.message_box(message = &#34;Are you sure?&#34;) == True:
+                        self.state = Game.STATE_QUIT
+                # event GUI - zmáčkli jsme tlačítko myši
+                if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                    # pokud je to nová hra
+                    if event.ui_element == self.gui.btn_new_game:
+                        # a jsme v menu
+                        if self.state == Game.STATE_MENU_MAIN:
+                            # pustíme ji rovnou
+                            self.run_new_game(Game.MODE_STANDARD)
+                        else:
+                            # jinak se zeptáme, jestli chce hru od začátku
+                            if self.gui.message_box(&#34;Abandon this game and start again?&#34;) == True:
+                                # Pokud ano, tak jedeme
+                                self.run_new_game(Game.MODE_STANDARD)
+                    # a je to open game
+                    if event.ui_element == self.gui.btn_open_game:
+                        # a jsme v menu
+                        if self.state == Game.STATE_MENU_MAIN:
+                            # pustíme ji rovnou
+                            self.run_new_game(Game.MODE_OPEN_GAME)
+                        else:
+                            # jinak se zeptáme, jestli chce hru od začátku
+                            if self.gui.message_box(&#34;Abandon this game and start again?&#34;) == True:
+                                # Pokud ano, tak jedeme
+                                self.run_new_game(Game.MODE_OPEN_GAME)
+                    # a je to nastaveni
+                    if event.ui_element == self.gui.btn_settings:
+                        # lze pouze v menu nebo v game run
+                        if self.state in (Game.STATE_MENU_MAIN, Game.STATE_GAME_RUN):
+                            print(&#34;Settings&#34;)
+                            # zakážeme hlavní menu
+                            self.gui.ui_menu.disable()
+                            # spustíme okno nastavení
+                            if self.gui.menu_settings(self.players) == True:
+                                # pokud vrátilo True, uložíme
+                                self.players.save()
+                            # povolíme hlavní menu
+                            self.gui.ui_menu.enable()
+                    # končíme?
+                    if event.ui_element == self.gui.btn_quit:
+                        if self.gui.message_box(message = &#34;Are you sure?&#34;) == True:
+                            self.state = Game.STATE_QUIT
+                # ostatní GUI eventy
+                self.gui.manager.process_events(event)
+                # kliknutí myší hlavním tlačítkem
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    # tah hráče
+                    for r in range (self.board.rows):
+                        for c in range(self.board.cols):
+                            # kliknul na hrací desku?
+                            if self.board.btns[r][c].collidepoint(pygame.mouse.get_pos()): # type: ignore
+                                print(&#34;Klik na &#34; + str(r) + &#34;:&#34; + str(c))
+                                # jestli je tu prázdno
+                                if self.board.grid[r][c] == Board.CELL_EMPTY:
+                                    # pokud je hráč člověk a hra běží
+                                    if self.players.active.type == Player.TYPE_HUMAN and self.state == Game.STATE_GAME_RUN:
+                                        # tak řekneme desce, že táhnul tam kam kliknul
+                                        self.board.make_move(self.players.active, (r, c))
+                                        # konec zvýrazňování
+                                        self.mark_coords = None
+                                        # stav je konec tahu
+                                        self.state = Game.STATE_GAME_END_MOVE
+
+            # je hráč AI a hra běží?
+            if self.players.active.type == Player.TYPE_AI and self.state == Game.STATE_GAME_RUN:
+                # další tah je právě sem
+                next_move = self.board.best_move(self.players.active)
+                # proveď ten tah
+                self.board.make_move(self.players.active, next_move)
+                # zvýrazníme tento tah
+                self.mark_coords = list()
+                self.mark_coords.append(next_move)
+                # stav je konec tahu
+                self.state = Game.STATE_GAME_END_MOVE
 
             # vykreslíme hrací desku na kreslící plochu
             self.board.draw(self.gui.screen, self.players, self.mark_coords)
             # kreslíme všechno
             self.gui.draw(time_delta)
 
-    def run_new_game(self) -&gt; None:
-        # přepneme do stavu běhu hry
-        self.state = self.STATE_GAME_RUN
+    def run_new_game(self, mode: int) -&gt; None:
+        &#34;&#34;&#34;Inicializace nové hry.&#34;&#34;&#34;
+        self.mode = mode
         # začneme nové kolo
         self.run_new_round()
         # vymažeme skóre
         self.players.reset_win_count()
         # nastavíme skóre k vykreslování
         self.gui.lbl_score.set_text(self.players.score())
-    
+
     def run_new_round(self) -&gt; None:
+        &#34;&#34;&#34;Inicializace nového kola.&#34;&#34;&#34;
         # resetujeme hráče a hrací desku do nastavení pro začátek hry
         self.players.reset()
         self.board.reset()
         # vymažeme označení
-        self.mark_coords = None</code></pre>
+        self.mark_coords = None
+        # přepneme do stavu běhu hry
+        self.state = self.STATE_GAME_RUN
+        # jsme v módu open game?
+        if self.mode == Game.MODE_OPEN_GAME: 
+            # tak nastavíme stav inicializace hry
+            self.state = Game.STATE_OPEN_GAME_INIT</code></pre>
 </details>
 </section>
 <section>
@@ -277,20 +336,33 @@ je třeba vymazat soubor .settings.dmp.</p></div>
     STATE_QUIT = 0
     #: Stav hry: Hlavní menu
     STATE_MENU_MAIN = 1
-    #: Stav hry: Menu nastavení
-    STATE_MENU_SETTINGS = 2
     #: Stav hry: Běh hry (tahu)
-    STATE_GAME_RUN = 3
+    STATE_GAME_RUN = 2
     #: Stav hry: Konec tahu
-    STATE_GAME_END_TURN = 4
+    STATE_GAME_END_MOVE = 3
+    #: Stav hry: Konec kola
+    STATE_GAME_END_ROUND = 4
+    #: Stav hry: Inicializace open game
+    STATE_OPEN_GAME_INIT = 5
+    #: Stav hry: Zahájení open game
+    STATE_OPEN_GAME_OPEN = 6
+
+    #: Mód hry: normální
+    MODE_STANDARD = 0
+    # Mód hry: hra k dokončení
+    MODE_OPEN_GAME = 1
 
     def __init__(self):
         #: Stav hry. Na začátku se spouští do hlavního menu.
-        self.state: int = self.STATE_MENU_MAIN
+        self.state: int = Game.STATE_MENU_MAIN
+        #: Mód hry.
+        self.mode: int = Game.MODE_STANDARD
         #: Seznam polí, která budou zvýrazněna (další tah počítače nebo výhra)
         self.mark_coords: list[tuple[int, int]] | None = None
-        #: vytvoříme GUI
+        #: Vytvoříme GUI pro menu a vykreslování
         self.gui = GUI()
+        # A jmenuju se Pyshqorky
+        pygame.display.set_caption(&#34;Pyshqorky&#34;)
         #: Hrací deska o velikosti 15x15 polí, 525x525 px, offset pro vykreslení do okna je 235x35 px
         self.board: Board = Board(15, 15, 525, 525, 235, 35)
         #: Seznam hráčů s implicitním nastavením.
@@ -298,10 +370,6 @@ je třeba vymazat soubor .settings.dmp.</p></div>
             Players.PLAYER_1: Player(id=Players.PLAYER_1, name=&#34;Human&#34;, color=(255, 64, 64), shape=Player.SHAPE_SQUARE, type=Player.TYPE_HUMAN, ai_level=Player.AI_LVL_BALANCED), 
             Players.PLAYER_2: Player(id=Players.PLAYER_2, name=&#34;Computer&#34;, color=(64, 64, 255), shape=Player.SHAPE_CIRCLE, type=Player.TYPE_AI, ai_level=Player.AI_LVL_BALANCED)
             })
-
-        # A jmenuju se Pyshqorky
-        pygame.display.set_caption(&#34;Pyshqorky&#34;)
-
         # Pokud jsme nedokázali nahrát uložené nastavení
         if Players.load() == None:
             # tak uložíme to aktuální jako základ
@@ -312,88 +380,29 @@ je třeba vymazat soubor .settings.dmp.</p></div>
 
     def main(self):
         &#34;&#34;&#34;
-        Vstupní bod po spuštění hry. Nastavení menu, hlavní smyčka hry a vykreslování.
+        Vstupní bod po spuštění hry. Hlavní smyčka hry.
         &#34;&#34;&#34;
+        msg: str = &#34;&#34;
+        og_moves: int = 20
+        players_backup: Players = Players({})
         # hlavní smyčka hry
         while self.state &gt; Game.STATE_QUIT:
             # nastavení FPS + časová delta (dle dokumentace důležité pro GUI)
             time_delta = self.gui.clock.tick(self.gui.fps)/1000.0
-            # zpracujeme eventy
-            for event in pygame.event.get():
-                # křížkem nebo zmáčknutím q je konec
-                if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_q):
-                    self.state = Game.STATE_QUIT
-                # event GUI - zmáčkli jsme tlačítko myši
-                if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                    # okud je to nová hra
-                    if event.ui_element == self.gui.btn_run:
-                        # a jsme v menu
-                        if self.state == self.STATE_MENU_MAIN:
-                            # pustíme ji rovnou
-                            self.run_new_game()
-                        else:
-                            # jinak se zeptáme, jestli chce hru od začátku
-                            if self.gui.message_box(&#34;Abandon this game and start again?&#34;) == True:
-                                # Pokud ano, tak jedeme
-                                self.run_new_game()
-                        # přepneme do stavu běhu hry
-                        self.state = self.STATE_GAME_RUN
-                        # resetujeme hráče a hrací desku do nastavení pro začátek hry
-                        self.players.reset()
-                        self.board.reset()
-                        self.mark_coords = None
-                        # neumožníme znovuspustit hru, pokud běží
-                        #self.gui.btn_run.disable()
-                    # zobrazíme nastavení
-                    if event.ui_element == self.gui.btn_settings:
-                        print(&#34;Settings&#34;)
-                        # zakážeme hlavní menu
-                        self.gui.ui_menu.disable()
-                        # spustíme okno nastavení
-                        if self.gui.menu_settings(self.players) == True:
-                            # pokud vrátilo True, uložíme
-                            self.players.save()
-                        # povolíme hlavní menu
-                        self.gui.ui_menu.enable()
-                    # končíme?
-                    if event.ui_element == self.gui.btn_quit or (event.type == pygame.KEYUP and event.key == pygame.K_q):
-                        if self.gui.message_box(message = &#34;Are you sure?&#34;) == True:
-                            self.state = Game.STATE_QUIT
-                # ostatní GUI eventy
-                self.gui.manager.process_events(event)
-                # kliknutí myší hlavním tlačítkem
-                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                    # tah hráče
-                    for r in range (self.board.rows):
-                        for c in range(self.board.cols):
-                            # kliknul na hrací desku?
-                            if self.board.btns[r][c].collidepoint(pygame.mouse.get_pos()): # type: ignore
-                                print(&#34;Klik na &#34; + str(r) + &#34;:&#34; + str(c))
-                                # jestli je tu prázdno
-                                if self.board.grid[r][c] == Board.CELL_EMPTY:
-                                    # pokud je hráč člověk a hra běží
-                                    if self.players.active.type == Player.TYPE_HUMAN and self.state == Game.STATE_GAME_RUN:
-                                        # tak řekneme desce, že táhnul tam kam kliknul
-                                        self.board.make_move(self.players.active, (r, c))
-                                        # konec zvýrazňování
-                                        self.mark_coords = None
-                                        # stav je konec tahu
-                                        self.state = Game.STATE_GAME_END_TURN
-
-            # je hráč AI a hra běží?
-            if self.players.active.type == Player.TYPE_AI and self.state == Game.STATE_GAME_RUN:
-                # další tah je právě sem
-                next_move = self.board.best_move(self.players.active)
-                # proveď ten tah
-                self.board.make_move(self.players.active, next_move)
-                # zvýrazníme tento tah
-                self.mark_coords = list()
-                self.mark_coords.append(next_move)
-                # stav je konec tahu
-                self.state = Game.STATE_GAME_END_TURN
+            
+            # je stav konec kola?
+            if self.state == Game.STATE_GAME_END_ROUND:
+                # zeptáme se, jestli pokračovat
+                # správnou otázku jsme si připravili předem
+                if self.gui.message_box(msg + &#34; Do you want to play next round?&#34;):
+                    # pokud ano, jedem dál
+                    self.run_new_round()
+                else:
+                    # jinak menu
+                    self.state = Game.STATE_MENU_MAIN
 
             # je stav konec tahu? vyhodnocení a přepnutí
-            if self.state == Game.STATE_GAME_END_TURN:
+            if self.state == Game.STATE_GAME_END_MOVE:
                 # co nám vrátí wintie?
                 wt_state, to_mark = self.board.win_tie(self.players.active)
                 # Není výhra, prohra ani remíza
@@ -424,42 +433,162 @@ je třeba vymazat soubor .settings.dmp.</p></div>
                             msg = &#34;Game is tie.&#34;
                     # Aktualizace skóre
                     self.gui.lbl_score.set_text(self.players.score())
-                    # zeptáme se, jestli pokračovat
-                    # správnou otázku jsme si připravili předem
-                    if self.gui.message_box(msg + &#34; Do you want to play next round?&#34;):
-                        # pokud ano, jedem dál
-                        self.run_new_round()
-                    else:
-                        # jinak menu
-                        self.state = Game.STATE_MENU_MAIN
+                    self.state = Game.STATE_GAME_END_ROUND
+            
+            # je stav inicializace open game?
+            if self.state == Game.STATE_OPEN_GAME_INIT:
+                og_moves = 20
+                # zazálohujeme si players
+                players_backup = copy.deepcopy(self.players)
+                # nastavíme typ hráče na AI 
+                self.players.active.type = Player.TYPE_AI
+                self.players.oponent.type = Player.TYPE_AI
+                # nastavíme ai level open game
+                self.players.active.ai_level = Player.AI_LVL_OPEN_GAME
+                self.players.oponent.ai_level = Player.AI_LVL_OPEN_GAME
+                # jdeme zahajovat
+                self.state = Game.STATE_OPEN_GAME_OPEN
+            # je stav zahájení open game?
+            if self.state == Game.STATE_OPEN_GAME_OPEN:
+                # další tah je právě sem
+                next_move = self.board.best_move(self.players.active)
+                # proveď ten tah
+                self.board.make_move(self.players.active, next_move)
+                # přepneme hráče
+                self.players.next()
+                og_moves -= 1
+                if og_moves == 0:
+                    self.state = Game.STATE_GAME_RUN
+                    # vrátíme tam původní hodnoty
+                    self.players = copy.deepcopy(players_backup)
+            # zpracujeme eventy
+            for event in pygame.event.get():
+                # křížkem nebo zmáčknutím q je konec
+                if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_q):
+                    self.state = Game.STATE_QUIT
+                if event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE:
+                    if self.gui.message_box(message = &#34;Are you sure?&#34;) == True:
+                        self.state = Game.STATE_QUIT
+                # event GUI - zmáčkli jsme tlačítko myši
+                if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                    # pokud je to nová hra
+                    if event.ui_element == self.gui.btn_new_game:
+                        # a jsme v menu
+                        if self.state == Game.STATE_MENU_MAIN:
+                            # pustíme ji rovnou
+                            self.run_new_game(Game.MODE_STANDARD)
+                        else:
+                            # jinak se zeptáme, jestli chce hru od začátku
+                            if self.gui.message_box(&#34;Abandon this game and start again?&#34;) == True:
+                                # Pokud ano, tak jedeme
+                                self.run_new_game(Game.MODE_STANDARD)
+                    # a je to open game
+                    if event.ui_element == self.gui.btn_open_game:
+                        # a jsme v menu
+                        if self.state == Game.STATE_MENU_MAIN:
+                            # pustíme ji rovnou
+                            self.run_new_game(Game.MODE_OPEN_GAME)
+                        else:
+                            # jinak se zeptáme, jestli chce hru od začátku
+                            if self.gui.message_box(&#34;Abandon this game and start again?&#34;) == True:
+                                # Pokud ano, tak jedeme
+                                self.run_new_game(Game.MODE_OPEN_GAME)
+                    # a je to nastaveni
+                    if event.ui_element == self.gui.btn_settings:
+                        # lze pouze v menu nebo v game run
+                        if self.state in (Game.STATE_MENU_MAIN, Game.STATE_GAME_RUN):
+                            print(&#34;Settings&#34;)
+                            # zakážeme hlavní menu
+                            self.gui.ui_menu.disable()
+                            # spustíme okno nastavení
+                            if self.gui.menu_settings(self.players) == True:
+                                # pokud vrátilo True, uložíme
+                                self.players.save()
+                            # povolíme hlavní menu
+                            self.gui.ui_menu.enable()
+                    # končíme?
+                    if event.ui_element == self.gui.btn_quit:
+                        if self.gui.message_box(message = &#34;Are you sure?&#34;) == True:
+                            self.state = Game.STATE_QUIT
+                # ostatní GUI eventy
+                self.gui.manager.process_events(event)
+                # kliknutí myší hlavním tlačítkem
+                if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                    # tah hráče
+                    for r in range (self.board.rows):
+                        for c in range(self.board.cols):
+                            # kliknul na hrací desku?
+                            if self.board.btns[r][c].collidepoint(pygame.mouse.get_pos()): # type: ignore
+                                print(&#34;Klik na &#34; + str(r) + &#34;:&#34; + str(c))
+                                # jestli je tu prázdno
+                                if self.board.grid[r][c] == Board.CELL_EMPTY:
+                                    # pokud je hráč člověk a hra běží
+                                    if self.players.active.type == Player.TYPE_HUMAN and self.state == Game.STATE_GAME_RUN:
+                                        # tak řekneme desce, že táhnul tam kam kliknul
+                                        self.board.make_move(self.players.active, (r, c))
+                                        # konec zvýrazňování
+                                        self.mark_coords = None
+                                        # stav je konec tahu
+                                        self.state = Game.STATE_GAME_END_MOVE
+
+            # je hráč AI a hra běží?
+            if self.players.active.type == Player.TYPE_AI and self.state == Game.STATE_GAME_RUN:
+                # další tah je právě sem
+                next_move = self.board.best_move(self.players.active)
+                # proveď ten tah
+                self.board.make_move(self.players.active, next_move)
+                # zvýrazníme tento tah
+                self.mark_coords = list()
+                self.mark_coords.append(next_move)
+                # stav je konec tahu
+                self.state = Game.STATE_GAME_END_MOVE
 
             # vykreslíme hrací desku na kreslící plochu
             self.board.draw(self.gui.screen, self.players, self.mark_coords)
             # kreslíme všechno
             self.gui.draw(time_delta)
 
-    def run_new_game(self) -&gt; None:
-        # přepneme do stavu běhu hry
-        self.state = self.STATE_GAME_RUN
+    def run_new_game(self, mode: int) -&gt; None:
+        &#34;&#34;&#34;Inicializace nové hry.&#34;&#34;&#34;
+        self.mode = mode
         # začneme nové kolo
         self.run_new_round()
         # vymažeme skóre
         self.players.reset_win_count()
         # nastavíme skóre k vykreslování
         self.gui.lbl_score.set_text(self.players.score())
-    
+
     def run_new_round(self) -&gt; None:
+        &#34;&#34;&#34;Inicializace nového kola.&#34;&#34;&#34;
         # resetujeme hráče a hrací desku do nastavení pro začátek hry
         self.players.reset()
         self.board.reset()
         # vymažeme označení
-        self.mark_coords = None</code></pre>
+        self.mark_coords = None
+        # přepneme do stavu běhu hry
+        self.state = self.STATE_GAME_RUN
+        # jsme v módu open game?
+        if self.mode == Game.MODE_OPEN_GAME: 
+            # tak nastavíme stav inicializace hry
+            self.state = Game.STATE_OPEN_GAME_INIT</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
-<dt id="pyshqorky.game.Game.STATE_GAME_END_TURN"><code class="name">var <span class="ident">STATE_GAME_END_TURN</span></code></dt>
+<dt id="pyshqorky.game.Game.MODE_OPEN_GAME"><code class="name">var <span class="ident">MODE_OPEN_GAME</span></code></dt>
+<dd>
+<div class="desc"></div>
+</dd>
+<dt id="pyshqorky.game.Game.MODE_STANDARD"><code class="name">var <span class="ident">MODE_STANDARD</span></code></dt>
+<dd>
+<div class="desc"><p>Mód hry: normální</p></div>
+</dd>
+<dt id="pyshqorky.game.Game.STATE_GAME_END_MOVE"><code class="name">var <span class="ident">STATE_GAME_END_MOVE</span></code></dt>
 <dd>
 <div class="desc"><p>Stav hry: Konec tahu</p></div>
+</dd>
+<dt id="pyshqorky.game.Game.STATE_GAME_END_ROUND"><code class="name">var <span class="ident">STATE_GAME_END_ROUND</span></code></dt>
+<dd>
+<div class="desc"><p>Stav hry: Konec kola</p></div>
 </dd>
 <dt id="pyshqorky.game.Game.STATE_GAME_RUN"><code class="name">var <span class="ident">STATE_GAME_RUN</span></code></dt>
 <dd>
@@ -469,9 +598,13 @@ je třeba vymazat soubor .settings.dmp.</p></div>
 <dd>
 <div class="desc"><p>Stav hry: Hlavní menu</p></div>
 </dd>
-<dt id="pyshqorky.game.Game.STATE_MENU_SETTINGS"><code class="name">var <span class="ident">STATE_MENU_SETTINGS</span></code></dt>
+<dt id="pyshqorky.game.Game.STATE_OPEN_GAME_INIT"><code class="name">var <span class="ident">STATE_OPEN_GAME_INIT</span></code></dt>
 <dd>
-<div class="desc"><p>Stav hry: Menu nastavení</p></div>
+<div class="desc"><p>Stav hry: Inicializace open game</p></div>
+</dd>
+<dt id="pyshqorky.game.Game.STATE_OPEN_GAME_OPEN"><code class="name">var <span class="ident">STATE_OPEN_GAME_OPEN</span></code></dt>
+<dd>
+<div class="desc"><p>Stav hry: Zahájení open game</p></div>
 </dd>
 <dt id="pyshqorky.game.Game.STATE_QUIT"><code class="name">var <span class="ident">STATE_QUIT</span></code></dt>
 <dd>
@@ -486,11 +619,15 @@ je třeba vymazat soubor .settings.dmp.</p></div>
 </dd>
 <dt id="pyshqorky.game.Game.gui"><code class="name">var <span class="ident">gui</span></code></dt>
 <dd>
-<div class="desc"><p>vytvoříme GUI</p></div>
+<div class="desc"><p>Vytvoříme GUI pro menu a vykreslování</p></div>
 </dd>
 <dt id="pyshqorky.game.Game.mark_coords"><code class="name">var <span class="ident">mark_coords</span></code></dt>
 <dd>
 <div class="desc"><p>Seznam polí, která budou zvýrazněna (další tah počítače nebo výhra)</p></div>
+</dd>
+<dt id="pyshqorky.game.Game.mode"><code class="name">var <span class="ident">mode</span></code></dt>
+<dd>
+<div class="desc"><p>Mód hry.</p></div>
 </dd>
 <dt id="pyshqorky.game.Game.players"><code class="name">var <span class="ident">players</span></code></dt>
 <dd>
@@ -507,95 +644,36 @@ je třeba vymazat soubor .settings.dmp.</p></div>
 <span>def <span class="ident">main</span></span>(<span>self)</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Vstupní bod po spuštění hry. Nastavení menu, hlavní smyčka hry a vykreslování.</p></div>
+<div class="desc"><p>Vstupní bod po spuštění hry. Hlavní smyčka hry.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def main(self):
     &#34;&#34;&#34;
-    Vstupní bod po spuštění hry. Nastavení menu, hlavní smyčka hry a vykreslování.
+    Vstupní bod po spuštění hry. Hlavní smyčka hry.
     &#34;&#34;&#34;
+    msg: str = &#34;&#34;
+    og_moves: int = 20
+    players_backup: Players = Players({})
     # hlavní smyčka hry
     while self.state &gt; Game.STATE_QUIT:
         # nastavení FPS + časová delta (dle dokumentace důležité pro GUI)
         time_delta = self.gui.clock.tick(self.gui.fps)/1000.0
-        # zpracujeme eventy
-        for event in pygame.event.get():
-            # křížkem nebo zmáčknutím q je konec
-            if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_q):
-                self.state = Game.STATE_QUIT
-            # event GUI - zmáčkli jsme tlačítko myši
-            if event.type == pygame_gui.UI_BUTTON_PRESSED:
-                # okud je to nová hra
-                if event.ui_element == self.gui.btn_run:
-                    # a jsme v menu
-                    if self.state == self.STATE_MENU_MAIN:
-                        # pustíme ji rovnou
-                        self.run_new_game()
-                    else:
-                        # jinak se zeptáme, jestli chce hru od začátku
-                        if self.gui.message_box(&#34;Abandon this game and start again?&#34;) == True:
-                            # Pokud ano, tak jedeme
-                            self.run_new_game()
-                    # přepneme do stavu běhu hry
-                    self.state = self.STATE_GAME_RUN
-                    # resetujeme hráče a hrací desku do nastavení pro začátek hry
-                    self.players.reset()
-                    self.board.reset()
-                    self.mark_coords = None
-                    # neumožníme znovuspustit hru, pokud běží
-                    #self.gui.btn_run.disable()
-                # zobrazíme nastavení
-                if event.ui_element == self.gui.btn_settings:
-                    print(&#34;Settings&#34;)
-                    # zakážeme hlavní menu
-                    self.gui.ui_menu.disable()
-                    # spustíme okno nastavení
-                    if self.gui.menu_settings(self.players) == True:
-                        # pokud vrátilo True, uložíme
-                        self.players.save()
-                    # povolíme hlavní menu
-                    self.gui.ui_menu.enable()
-                # končíme?
-                if event.ui_element == self.gui.btn_quit or (event.type == pygame.KEYUP and event.key == pygame.K_q):
-                    if self.gui.message_box(message = &#34;Are you sure?&#34;) == True:
-                        self.state = Game.STATE_QUIT
-            # ostatní GUI eventy
-            self.gui.manager.process_events(event)
-            # kliknutí myší hlavním tlačítkem
-            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
-                # tah hráče
-                for r in range (self.board.rows):
-                    for c in range(self.board.cols):
-                        # kliknul na hrací desku?
-                        if self.board.btns[r][c].collidepoint(pygame.mouse.get_pos()): # type: ignore
-                            print(&#34;Klik na &#34; + str(r) + &#34;:&#34; + str(c))
-                            # jestli je tu prázdno
-                            if self.board.grid[r][c] == Board.CELL_EMPTY:
-                                # pokud je hráč člověk a hra běží
-                                if self.players.active.type == Player.TYPE_HUMAN and self.state == Game.STATE_GAME_RUN:
-                                    # tak řekneme desce, že táhnul tam kam kliknul
-                                    self.board.make_move(self.players.active, (r, c))
-                                    # konec zvýrazňování
-                                    self.mark_coords = None
-                                    # stav je konec tahu
-                                    self.state = Game.STATE_GAME_END_TURN
-
-        # je hráč AI a hra běží?
-        if self.players.active.type == Player.TYPE_AI and self.state == Game.STATE_GAME_RUN:
-            # další tah je právě sem
-            next_move = self.board.best_move(self.players.active)
-            # proveď ten tah
-            self.board.make_move(self.players.active, next_move)
-            # zvýrazníme tento tah
-            self.mark_coords = list()
-            self.mark_coords.append(next_move)
-            # stav je konec tahu
-            self.state = Game.STATE_GAME_END_TURN
+        
+        # je stav konec kola?
+        if self.state == Game.STATE_GAME_END_ROUND:
+            # zeptáme se, jestli pokračovat
+            # správnou otázku jsme si připravili předem
+            if self.gui.message_box(msg + &#34; Do you want to play next round?&#34;):
+                # pokud ano, jedem dál
+                self.run_new_round()
+            else:
+                # jinak menu
+                self.state = Game.STATE_MENU_MAIN
 
         # je stav konec tahu? vyhodnocení a přepnutí
-        if self.state == Game.STATE_GAME_END_TURN:
+        if self.state == Game.STATE_GAME_END_MOVE:
             # co nám vrátí wintie?
             wt_state, to_mark = self.board.win_tie(self.players.active)
             # Není výhra, prohra ani remíza
@@ -626,14 +704,115 @@ je třeba vymazat soubor .settings.dmp.</p></div>
                         msg = &#34;Game is tie.&#34;
                 # Aktualizace skóre
                 self.gui.lbl_score.set_text(self.players.score())
-                # zeptáme se, jestli pokračovat
-                # správnou otázku jsme si připravili předem
-                if self.gui.message_box(msg + &#34; Do you want to play next round?&#34;):
-                    # pokud ano, jedem dál
-                    self.run_new_round()
-                else:
-                    # jinak menu
-                    self.state = Game.STATE_MENU_MAIN
+                self.state = Game.STATE_GAME_END_ROUND
+        
+        # je stav inicializace open game?
+        if self.state == Game.STATE_OPEN_GAME_INIT:
+            og_moves = 20
+            # zazálohujeme si players
+            players_backup = copy.deepcopy(self.players)
+            # nastavíme typ hráče na AI 
+            self.players.active.type = Player.TYPE_AI
+            self.players.oponent.type = Player.TYPE_AI
+            # nastavíme ai level open game
+            self.players.active.ai_level = Player.AI_LVL_OPEN_GAME
+            self.players.oponent.ai_level = Player.AI_LVL_OPEN_GAME
+            # jdeme zahajovat
+            self.state = Game.STATE_OPEN_GAME_OPEN
+        # je stav zahájení open game?
+        if self.state == Game.STATE_OPEN_GAME_OPEN:
+            # další tah je právě sem
+            next_move = self.board.best_move(self.players.active)
+            # proveď ten tah
+            self.board.make_move(self.players.active, next_move)
+            # přepneme hráče
+            self.players.next()
+            og_moves -= 1
+            if og_moves == 0:
+                self.state = Game.STATE_GAME_RUN
+                # vrátíme tam původní hodnoty
+                self.players = copy.deepcopy(players_backup)
+        # zpracujeme eventy
+        for event in pygame.event.get():
+            # křížkem nebo zmáčknutím q je konec
+            if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_q):
+                self.state = Game.STATE_QUIT
+            if event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE:
+                if self.gui.message_box(message = &#34;Are you sure?&#34;) == True:
+                    self.state = Game.STATE_QUIT
+            # event GUI - zmáčkli jsme tlačítko myši
+            if event.type == pygame_gui.UI_BUTTON_PRESSED:
+                # pokud je to nová hra
+                if event.ui_element == self.gui.btn_new_game:
+                    # a jsme v menu
+                    if self.state == Game.STATE_MENU_MAIN:
+                        # pustíme ji rovnou
+                        self.run_new_game(Game.MODE_STANDARD)
+                    else:
+                        # jinak se zeptáme, jestli chce hru od začátku
+                        if self.gui.message_box(&#34;Abandon this game and start again?&#34;) == True:
+                            # Pokud ano, tak jedeme
+                            self.run_new_game(Game.MODE_STANDARD)
+                # a je to open game
+                if event.ui_element == self.gui.btn_open_game:
+                    # a jsme v menu
+                    if self.state == Game.STATE_MENU_MAIN:
+                        # pustíme ji rovnou
+                        self.run_new_game(Game.MODE_OPEN_GAME)
+                    else:
+                        # jinak se zeptáme, jestli chce hru od začátku
+                        if self.gui.message_box(&#34;Abandon this game and start again?&#34;) == True:
+                            # Pokud ano, tak jedeme
+                            self.run_new_game(Game.MODE_OPEN_GAME)
+                # a je to nastaveni
+                if event.ui_element == self.gui.btn_settings:
+                    # lze pouze v menu nebo v game run
+                    if self.state in (Game.STATE_MENU_MAIN, Game.STATE_GAME_RUN):
+                        print(&#34;Settings&#34;)
+                        # zakážeme hlavní menu
+                        self.gui.ui_menu.disable()
+                        # spustíme okno nastavení
+                        if self.gui.menu_settings(self.players) == True:
+                            # pokud vrátilo True, uložíme
+                            self.players.save()
+                        # povolíme hlavní menu
+                        self.gui.ui_menu.enable()
+                # končíme?
+                if event.ui_element == self.gui.btn_quit:
+                    if self.gui.message_box(message = &#34;Are you sure?&#34;) == True:
+                        self.state = Game.STATE_QUIT
+            # ostatní GUI eventy
+            self.gui.manager.process_events(event)
+            # kliknutí myší hlavním tlačítkem
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                # tah hráče
+                for r in range (self.board.rows):
+                    for c in range(self.board.cols):
+                        # kliknul na hrací desku?
+                        if self.board.btns[r][c].collidepoint(pygame.mouse.get_pos()): # type: ignore
+                            print(&#34;Klik na &#34; + str(r) + &#34;:&#34; + str(c))
+                            # jestli je tu prázdno
+                            if self.board.grid[r][c] == Board.CELL_EMPTY:
+                                # pokud je hráč člověk a hra běží
+                                if self.players.active.type == Player.TYPE_HUMAN and self.state == Game.STATE_GAME_RUN:
+                                    # tak řekneme desce, že táhnul tam kam kliknul
+                                    self.board.make_move(self.players.active, (r, c))
+                                    # konec zvýrazňování
+                                    self.mark_coords = None
+                                    # stav je konec tahu
+                                    self.state = Game.STATE_GAME_END_MOVE
+
+        # je hráč AI a hra běží?
+        if self.players.active.type == Player.TYPE_AI and self.state == Game.STATE_GAME_RUN:
+            # další tah je právě sem
+            next_move = self.board.best_move(self.players.active)
+            # proveď ten tah
+            self.board.make_move(self.players.active, next_move)
+            # zvýrazníme tento tah
+            self.mark_coords = list()
+            self.mark_coords.append(next_move)
+            # stav je konec tahu
+            self.state = Game.STATE_GAME_END_MOVE
 
         # vykreslíme hrací desku na kreslící plochu
         self.board.draw(self.gui.screen, self.players, self.mark_coords)
@@ -642,17 +821,17 @@ je třeba vymazat soubor .settings.dmp.</p></div>
 </details>
 </dd>
 <dt id="pyshqorky.game.Game.run_new_game"><code class="name flex">
-<span>def <span class="ident">run_new_game</span></span>(<span>self) ‑> None</span>
+<span>def <span class="ident">run_new_game</span></span>(<span>self, mode: int) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Inicializace nové hry.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def run_new_game(self) -&gt; None:
-    # přepneme do stavu běhu hry
-    self.state = self.STATE_GAME_RUN
+<pre><code class="python">def run_new_game(self, mode: int) -&gt; None:
+    &#34;&#34;&#34;Inicializace nové hry.&#34;&#34;&#34;
+    self.mode = mode
     # začneme nové kolo
     self.run_new_round()
     # vymažeme skóre
@@ -665,17 +844,24 @@ je třeba vymazat soubor .settings.dmp.</p></div>
 <span>def <span class="ident">run_new_round</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"></div>
+<div class="desc"><p>Inicializace nového kola.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def run_new_round(self) -&gt; None:
+    &#34;&#34;&#34;Inicializace nového kola.&#34;&#34;&#34;
     # resetujeme hráče a hrací desku do nastavení pro začátek hry
     self.players.reset()
     self.board.reset()
     # vymažeme označení
-    self.mark_coords = None</code></pre>
+    self.mark_coords = None
+    # přepneme do stavu běhu hry
+    self.state = self.STATE_GAME_RUN
+    # jsme v módu open game?
+    if self.mode == Game.MODE_OPEN_GAME: 
+        # tak nastavíme stav inicializace hry
+        self.state = Game.STATE_OPEN_GAME_INIT</code></pre>
 </details>
 </dd>
 </dl>
@@ -698,16 +884,21 @@ je třeba vymazat soubor .settings.dmp.</p></div>
 <ul>
 <li>
 <h4><code><a title="pyshqorky.game.Game" href="#pyshqorky.game.Game">Game</a></code></h4>
-<ul class="two-column">
-<li><code><a title="pyshqorky.game.Game.STATE_GAME_END_TURN" href="#pyshqorky.game.Game.STATE_GAME_END_TURN">STATE_GAME_END_TURN</a></code></li>
+<ul class="">
+<li><code><a title="pyshqorky.game.Game.MODE_OPEN_GAME" href="#pyshqorky.game.Game.MODE_OPEN_GAME">MODE_OPEN_GAME</a></code></li>
+<li><code><a title="pyshqorky.game.Game.MODE_STANDARD" href="#pyshqorky.game.Game.MODE_STANDARD">MODE_STANDARD</a></code></li>
+<li><code><a title="pyshqorky.game.Game.STATE_GAME_END_MOVE" href="#pyshqorky.game.Game.STATE_GAME_END_MOVE">STATE_GAME_END_MOVE</a></code></li>
+<li><code><a title="pyshqorky.game.Game.STATE_GAME_END_ROUND" href="#pyshqorky.game.Game.STATE_GAME_END_ROUND">STATE_GAME_END_ROUND</a></code></li>
 <li><code><a title="pyshqorky.game.Game.STATE_GAME_RUN" href="#pyshqorky.game.Game.STATE_GAME_RUN">STATE_GAME_RUN</a></code></li>
 <li><code><a title="pyshqorky.game.Game.STATE_MENU_MAIN" href="#pyshqorky.game.Game.STATE_MENU_MAIN">STATE_MENU_MAIN</a></code></li>
-<li><code><a title="pyshqorky.game.Game.STATE_MENU_SETTINGS" href="#pyshqorky.game.Game.STATE_MENU_SETTINGS">STATE_MENU_SETTINGS</a></code></li>
+<li><code><a title="pyshqorky.game.Game.STATE_OPEN_GAME_INIT" href="#pyshqorky.game.Game.STATE_OPEN_GAME_INIT">STATE_OPEN_GAME_INIT</a></code></li>
+<li><code><a title="pyshqorky.game.Game.STATE_OPEN_GAME_OPEN" href="#pyshqorky.game.Game.STATE_OPEN_GAME_OPEN">STATE_OPEN_GAME_OPEN</a></code></li>
 <li><code><a title="pyshqorky.game.Game.STATE_QUIT" href="#pyshqorky.game.Game.STATE_QUIT">STATE_QUIT</a></code></li>
 <li><code><a title="pyshqorky.game.Game.board" href="#pyshqorky.game.Game.board">board</a></code></li>
 <li><code><a title="pyshqorky.game.Game.gui" href="#pyshqorky.game.Game.gui">gui</a></code></li>
 <li><code><a title="pyshqorky.game.Game.main" href="#pyshqorky.game.Game.main">main</a></code></li>
 <li><code><a title="pyshqorky.game.Game.mark_coords" href="#pyshqorky.game.Game.mark_coords">mark_coords</a></code></li>
+<li><code><a title="pyshqorky.game.Game.mode" href="#pyshqorky.game.Game.mode">mode</a></code></li>
 <li><code><a title="pyshqorky.game.Game.players" href="#pyshqorky.game.Game.players">players</a></code></li>
 <li><code><a title="pyshqorky.game.Game.run_new_game" href="#pyshqorky.game.Game.run_new_game">run_new_game</a></code></li>
 <li><code><a title="pyshqorky.game.Game.run_new_round" href="#pyshqorky.game.Game.run_new_round">run_new_round</a></code></li>

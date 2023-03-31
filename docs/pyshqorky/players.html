@@ -61,12 +61,13 @@ class Players(dict[int, Player]):
     #: Id druhého hráče
     PLAYER_2 = -1 
 
-    def __init__(self, dict: dict[int, Player]):
+    def __init__(self, new_dict: dict[int, Player]):
         #: Id právě hrajícího hráče.
         self.id_active: int = self.PLAYER_1
-        
+        #: Počet kol pro open game, implicitně 5
+        self.open_game_turns = 5
         # a voláme konstruktor rodiče
-        super().__init__(dict)
+        super().__init__(new_dict)
 
     @property
     def active(self) -&gt; Player:
@@ -135,7 +136,7 @@ class Players(dict[int, Player]):
 <dl>
 <dt id="pyshqorky.players.Players"><code class="flex name class">
 <span>class <span class="ident">Players</span></span>
-<span>(</span><span>dict: dict[int, Player])</span>
+<span>(</span><span>new_dict: dict[int, Player])</span>
 </code></dt>
 <dd>
 <div class="desc"><p>Seznam hráčů. Je navržen tak, že hráč jedna má id 1, hráč dva má id -1.
@@ -156,12 +157,13 @@ Na začátku naplníme slovník. Očekávám dva hráče s id 1 a -1.</p></div>
     #: Id druhého hráče
     PLAYER_2 = -1 
 
-    def __init__(self, dict: dict[int, Player]):
+    def __init__(self, new_dict: dict[int, Player]):
         #: Id právě hrajícího hráče.
         self.id_active: int = self.PLAYER_1
-        
+        #: Počet kol pro open game, implicitně 5
+        self.open_game_turns = 5
         # a voláme konstruktor rodiče
-        super().__init__(dict)
+        super().__init__(new_dict)
 
     @property
     def active(self) -&gt; Player:
@@ -287,6 +289,10 @@ def active(self) -&gt; Player:
 <dd>
 <div class="desc"><p>Id právě hrajícího hráče.</p></div>
 </dd>
+<dt id="pyshqorky.players.Players.open_game_turns"><code class="name">var <span class="ident">open_game_turns</span></code></dt>
+<dd>
+<div class="desc"><p>Počet kol pro open game, implicitně 5</p></div>
+</dd>
 <dt id="pyshqorky.players.Players.oponent"><code class="name">var <span class="ident">oponent</span> : <a title="pyshqorky.player.Player" href="player.html#pyshqorky.player.Player">Player</a></code></dt>
 <dd>
 <div class="desc"><p>Vrací hráče, který právě <strong>není</strong> na tahu</p></div>
@@ -408,6 +414,7 @@ Otevřeme soubor filename (defultně .settings.dmp) pro zápis a dumpneme tam te
 <li><code><a title="pyshqorky.players.Players.id_active" href="#pyshqorky.players.Players.id_active">id_active</a></code></li>
 <li><code><a title="pyshqorky.players.Players.load" href="#pyshqorky.players.Players.load">load</a></code></li>
 <li><code><a title="pyshqorky.players.Players.next" href="#pyshqorky.players.Players.next">next</a></code></li>
+<li><code><a title="pyshqorky.players.Players.open_game_turns" href="#pyshqorky.players.Players.open_game_turns">open_game_turns</a></code></li>
 <li><code><a title="pyshqorky.players.Players.oponent" href="#pyshqorky.players.Players.oponent">oponent</a></code></li>
 <li><code><a title="pyshqorky.players.Players.reset" href="#pyshqorky.players.Players.reset">reset</a></code></li>
 <li><code><a title="pyshqorky.players.Players.reset_win_count" href="#pyshqorky.players.Players.reset_win_count">reset_win_count</a></code></li>
