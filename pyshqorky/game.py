@@ -127,7 +127,8 @@ class Game:
             
             # je stav inicializace open game?
             if self.state == Game.STATE_OPEN_GAME_INIT:
-                og_moves = 20
+                # nastavíme počet tahů podle konfigurace (turn = 2*move)
+                og_moves = self.players.open_game_turns
                 # zazálohujeme si players
                 players_backup = copy.deepcopy(self.players)
                 # nastavíme typ hráče na AI 
