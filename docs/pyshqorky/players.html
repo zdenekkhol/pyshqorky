@@ -52,7 +52,8 @@ from pyshqorky.player import *
 
 class Players(dict[int, Player]):
     &#34;&#34;&#34;
-    Seznam hráčů. Je navržen tak, že hráč jedna má id 1, hráč dva má id -1. Object je děděn ze slovníku, kde index je shodný s id hráče, hodnota je objekt `pyshqorky.player.Player`.
+    Seznam hráčů. Je navržen tak, že hráč jedna má id 1, hráč dva má id -1.
+    Object je děděn ze slovníku, kde index je shodný s id hráče, hodnota je objekt `pyshqorky.player.Player`.
     Na začátku naplníme slovník. Očekávám dva hráče s id 1 a -1.
     &#34;&#34;&#34;
     #: Id prvího hráče
@@ -85,34 +86,42 @@ class Players(dict[int, Player]):
         &#34;&#34;&#34;Nastavení nové hry. Začíná hráč číslo jedna&#34;&#34;&#34;
         self.id_active = self.PLAYER_1
 
-    def save(self, filename: str = &#34;.savegame&#34;) -&gt; None:
+    def save(self, filename: str = &#34;.settings.dmp&#34;) -&gt; None:
         &#34;&#34;&#34;
         Uložení konfigurace hry.
-        Otevřeme soubor filename (defultně .savegame) pro zápis a dumpneme tam tento objekt. Poté za sebou zavřeme.
+        Otevřeme soubor filename (defultně .settings.dmp) pro zápis a dumpneme tam tento objekt. Poté za sebou zavřeme.
         &#34;&#34;&#34;
         pf = open(filename, &#34;wb&#34;)
         pickle.dump(self, pf)
         pf.close()
 
     @staticmethod
-    def load(filename: str = &#34;.savegame&#34;) -&gt; Players:
+    def load(filename: str = &#34;.settings.dmp&#34;) -&gt; Players:
         &#34;&#34;&#34;
         Načtení konfigurace hry.
-        Zkusíme otevřít soubor filename (defaultně .savegame) pro čtení.
-        Pokud se povedlo, načteme do proměnné loaded a vrátíme. Očekáváme, že v souboru je instance objektu Players. Na konec po sobě zavřeme.
+        Zkusíme otevřít soubor filename (defaultně .settings.dmp) pro čtení.
+        Pokud se povedlo, načteme do proměnné loaded, vynulujeme počet vítězství a vrátíme.
+        Očekáváme, že v souboru je instance objektu Players. Na konec po sobě zavřeme.
         Pokud se nepovedlo otevřít soubor, vracíme None.
         &#34;&#34;&#34;
         try:
             pf = open(filename, &#34;rb&#34;)
-            loaded = pickle.load(pf)
+            loaded: Players = pickle.load(pf)
             pf.close()
+            loaded.reset_win_count()
             return loaded
         except FileNotFoundError:
             return None # type: ignore
         
     def score(self) -&gt; str:
         &#34;&#34;&#34;Vrací skóre vítězství pro zobrazení ve tvaru 0 : 0&#34;&#34;&#34;
-        return &#34;{} : {}&#34;.format(self.__getitem__(Players.PLAYER_1).win_count, self.__getitem__(Players.PLAYER_2).win_count)                </code></pre>
+        return &#34;{} : {}&#34;.format(self.__getitem__(Players.PLAYER_1).win_count,
+                                self.__getitem__(Players.PLAYER_2).win_count)
+    
+    def reset_win_count(self) -&gt; None:
+        &#34;&#34;&#34;Vynuluje počet vítězství pro oba hráče&#34;&#34;&#34;
+        for i, p in self.items():
+            p.win_count = 0</code></pre>
 </details>
 </section>
 <section>
@@ -129,7 +138,8 @@ class Players(dict[int, Player]):
 <span>(</span><span>dict: dict[int, Player])</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Seznam hráčů. Je navržen tak, že hráč jedna má id 1, hráč dva má id -1. Object je děděn ze slovníku, kde index je shodný s id hráče, hodnota je objekt <code><a title="pyshqorky.player.Player" href="player.html#pyshqorky.player.Player">Player</a></code>.
+<div class="desc"><p>Seznam hráčů. Je navržen tak, že hráč jedna má id 1, hráč dva má id -1.
+Object je děděn ze slovníku, kde index je shodný s id hráče, hodnota je objekt <code><a title="pyshqorky.player.Player" href="player.html#pyshqorky.player.Player">Player</a></code>.
 Na začátku naplníme slovník. Očekávám dva hráče s id 1 a -1.</p></div>
 <details class="source">
 <summary>
@@ -137,7 +147,8 @@ Na začátku naplníme slovník. Očekávám dva hráče s id 1 a -1.</p></div>
 </summary>
 <pre><code class="python">class Players(dict[int, Player]):
     &#34;&#34;&#34;
-    Seznam hráčů. Je navržen tak, že hráč jedna má id 1, hráč dva má id -1. Object je děděn ze slovníku, kde index je shodný s id hráče, hodnota je objekt `pyshqorky.player.Player`.
+    Seznam hráčů. Je navržen tak, že hráč jedna má id 1, hráč dva má id -1.
+    Object je děděn ze slovníku, kde index je shodný s id hráče, hodnota je objekt `pyshqorky.player.Player`.
     Na začátku naplníme slovník. Očekávám dva hráče s id 1 a -1.
     &#34;&#34;&#34;
     #: Id prvího hráče
@@ -170,34 +181,42 @@ Na začátku naplníme slovník. Očekávám dva hráče s id 1 a -1.</p></div>
         &#34;&#34;&#34;Nastavení nové hry. Začíná hráč číslo jedna&#34;&#34;&#34;
         self.id_active = self.PLAYER_1
 
-    def save(self, filename: str = &#34;.savegame&#34;) -&gt; None:
+    def save(self, filename: str = &#34;.settings.dmp&#34;) -&gt; None:
         &#34;&#34;&#34;
         Uložení konfigurace hry.
-        Otevřeme soubor filename (defultně .savegame) pro zápis a dumpneme tam tento objekt. Poté za sebou zavřeme.
+        Otevřeme soubor filename (defultně .settings.dmp) pro zápis a dumpneme tam tento objekt. Poté za sebou zavřeme.
         &#34;&#34;&#34;
         pf = open(filename, &#34;wb&#34;)
         pickle.dump(self, pf)
         pf.close()
 
     @staticmethod
-    def load(filename: str = &#34;.savegame&#34;) -&gt; Players:
+    def load(filename: str = &#34;.settings.dmp&#34;) -&gt; Players:
         &#34;&#34;&#34;
         Načtení konfigurace hry.
-        Zkusíme otevřít soubor filename (defaultně .savegame) pro čtení.
-        Pokud se povedlo, načteme do proměnné loaded a vrátíme. Očekáváme, že v souboru je instance objektu Players. Na konec po sobě zavřeme.
+        Zkusíme otevřít soubor filename (defaultně .settings.dmp) pro čtení.
+        Pokud se povedlo, načteme do proměnné loaded, vynulujeme počet vítězství a vrátíme.
+        Očekáváme, že v souboru je instance objektu Players. Na konec po sobě zavřeme.
         Pokud se nepovedlo otevřít soubor, vracíme None.
         &#34;&#34;&#34;
         try:
             pf = open(filename, &#34;rb&#34;)
-            loaded = pickle.load(pf)
+            loaded: Players = pickle.load(pf)
             pf.close()
+            loaded.reset_win_count()
             return loaded
         except FileNotFoundError:
             return None # type: ignore
         
     def score(self) -&gt; str:
         &#34;&#34;&#34;Vrací skóre vítězství pro zobrazení ve tvaru 0 : 0&#34;&#34;&#34;
-        return &#34;{} : {}&#34;.format(self.__getitem__(Players.PLAYER_1).win_count, self.__getitem__(Players.PLAYER_2).win_count)                </code></pre>
+        return &#34;{} : {}&#34;.format(self.__getitem__(Players.PLAYER_1).win_count,
+                                self.__getitem__(Players.PLAYER_2).win_count)
+    
+    def reset_win_count(self) -&gt; None:
+        &#34;&#34;&#34;Vynuluje počet vítězství pro oba hráče&#34;&#34;&#34;
+        for i, p in self.items():
+            p.win_count = 0</code></pre>
 </details>
 <h3>Ancestors</h3>
 <ul class="hlist">
@@ -217,29 +236,32 @@ Na začátku naplníme slovník. Očekávám dva hráče s id 1 a -1.</p></div>
 <h3>Static methods</h3>
 <dl>
 <dt id="pyshqorky.players.Players.load"><code class="name flex">
-<span>def <span class="ident">load</span></span>(<span>filename: str = '.savegame') ‑> <a title="pyshqorky.players.Players" href="#pyshqorky.players.Players">Players</a></span>
+<span>def <span class="ident">load</span></span>(<span>filename: str = '.settings.dmp') ‑> <a title="pyshqorky.players.Players" href="#pyshqorky.players.Players">Players</a></span>
 </code></dt>
 <dd>
 <div class="desc"><p>Načtení konfigurace hry.
-Zkusíme otevřít soubor filename (defaultně .savegame) pro čtení.
-Pokud se povedlo, načteme do proměnné loaded a vrátíme. Očekáváme, že v souboru je instance objektu Players. Na konec po sobě zavřeme.
+Zkusíme otevřít soubor filename (defaultně .settings.dmp) pro čtení.
+Pokud se povedlo, načteme do proměnné loaded, vynulujeme počet vítězství a vrátíme.
+Očekáváme, že v souboru je instance objektu Players. Na konec po sobě zavřeme.
 Pokud se nepovedlo otevřít soubor, vracíme None.</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">@staticmethod
-def load(filename: str = &#34;.savegame&#34;) -&gt; Players:
+def load(filename: str = &#34;.settings.dmp&#34;) -&gt; Players:
     &#34;&#34;&#34;
     Načtení konfigurace hry.
-    Zkusíme otevřít soubor filename (defaultně .savegame) pro čtení.
-    Pokud se povedlo, načteme do proměnné loaded a vrátíme. Očekáváme, že v souboru je instance objektu Players. Na konec po sobě zavřeme.
+    Zkusíme otevřít soubor filename (defaultně .settings.dmp) pro čtení.
+    Pokud se povedlo, načteme do proměnné loaded, vynulujeme počet vítězství a vrátíme.
+    Očekáváme, že v souboru je instance objektu Players. Na konec po sobě zavřeme.
     Pokud se nepovedlo otevřít soubor, vracíme None.
     &#34;&#34;&#34;
     try:
         pf = open(filename, &#34;rb&#34;)
-        loaded = pickle.load(pf)
+        loaded: Players = pickle.load(pf)
         pf.close()
+        loaded.reset_win_count()
         return loaded
     except FileNotFoundError:
         return None # type: ignore</code></pre>
@@ -309,20 +331,35 @@ def oponent(self) -&gt; Player:
     self.id_active = self.PLAYER_1</code></pre>
 </details>
 </dd>
-<dt id="pyshqorky.players.Players.save"><code class="name flex">
-<span>def <span class="ident">save</span></span>(<span>self, filename: str = '.savegame') ‑> None</span>
+<dt id="pyshqorky.players.Players.reset_win_count"><code class="name flex">
+<span>def <span class="ident">reset_win_count</span></span>(<span>self) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Uložení konfigurace hry.
-Otevřeme soubor filename (defultně .savegame) pro zápis a dumpneme tam tento objekt. Poté za sebou zavřeme.</p></div>
+<div class="desc"><p>Vynuluje počet vítězství pro oba hráče</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
-<pre><code class="python">def save(self, filename: str = &#34;.savegame&#34;) -&gt; None:
+<pre><code class="python">def reset_win_count(self) -&gt; None:
+    &#34;&#34;&#34;Vynuluje počet vítězství pro oba hráče&#34;&#34;&#34;
+    for i, p in self.items():
+        p.win_count = 0</code></pre>
+</details>
+</dd>
+<dt id="pyshqorky.players.Players.save"><code class="name flex">
+<span>def <span class="ident">save</span></span>(<span>self, filename: str = '.settings.dmp') ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Uložení konfigurace hry.
+Otevřeme soubor filename (defultně .settings.dmp) pro zápis a dumpneme tam tento objekt. Poté za sebou zavřeme.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def save(self, filename: str = &#34;.settings.dmp&#34;) -&gt; None:
     &#34;&#34;&#34;
     Uložení konfigurace hry.
-    Otevřeme soubor filename (defultně .savegame) pro zápis a dumpneme tam tento objekt. Poté za sebou zavřeme.
+    Otevřeme soubor filename (defultně .settings.dmp) pro zápis a dumpneme tam tento objekt. Poté za sebou zavřeme.
     &#34;&#34;&#34;
     pf = open(filename, &#34;wb&#34;)
     pickle.dump(self, pf)
@@ -340,7 +377,8 @@ Otevřeme soubor filename (defultně .savegame) pro zápis a dumpneme tam tento 
 </summary>
 <pre><code class="python">def score(self) -&gt; str:
     &#34;&#34;&#34;Vrací skóre vítězství pro zobrazení ve tvaru 0 : 0&#34;&#34;&#34;
-    return &#34;{} : {}&#34;.format(self.__getitem__(Players.PLAYER_1).win_count, self.__getitem__(Players.PLAYER_2).win_count)                </code></pre>
+    return &#34;{} : {}&#34;.format(self.__getitem__(Players.PLAYER_1).win_count,
+                            self.__getitem__(Players.PLAYER_2).win_count)</code></pre>
 </details>
 </dd>
 </dl>
@@ -372,6 +410,7 @@ Otevřeme soubor filename (defultně .savegame) pro zápis a dumpneme tam tento 
 <li><code><a title="pyshqorky.players.Players.next" href="#pyshqorky.players.Players.next">next</a></code></li>
 <li><code><a title="pyshqorky.players.Players.oponent" href="#pyshqorky.players.Players.oponent">oponent</a></code></li>
 <li><code><a title="pyshqorky.players.Players.reset" href="#pyshqorky.players.Players.reset">reset</a></code></li>
+<li><code><a title="pyshqorky.players.Players.reset_win_count" href="#pyshqorky.players.Players.reset_win_count">reset_win_count</a></code></li>
 <li><code><a title="pyshqorky.players.Players.save" href="#pyshqorky.players.Players.save">save</a></code></li>
 <li><code><a title="pyshqorky.players.Players.score" href="#pyshqorky.players.Players.score">score</a></code></li>
 </ul>
