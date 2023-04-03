@@ -125,7 +125,7 @@ class Board:
         Inspirace zde: http://blog.trixi.cz/2013/02/popis-piskvorkoveho-algoritmu/
         """
         score = 0
-
+        #"""
         # ohodnocení řádků
         for r in range(self.rows):
             row_array = [int(i) for i in list(self.grid[r][:])]
@@ -149,9 +149,33 @@ class Board:
                 # a tohle /
                 window = [self.grid[r+4-i][c+i] for i in range(5)]
                 score += self.score_wnd5(window, player)
-
+        """
+        # optimalizovaný algoritmus, jenom nefunguje stejně
+        for r in range(2, self.rows-2):
+            for c in range(2, self.cols-2):
+                # ohodnotíme řádky
+                window = [self.grid[r-2+i][c] for i in range(5)]
+                # budeme hodnotit pouze pokud tu není prázdno
+                if window.count(Board.CELL_EMPTY != 5):
+                    score += self.score_wnd5(window, player)
+                # sloupce
+                window = [self.grid[r][c-2+i] for i in range(5)]
+                # budeme hodnotit pouze pokud tu není prázdno
+                if window.count(Board.CELL_EMPTY != 5):
+                    score += self.score_wnd5(window, player)
+                # diagonála \
+                window = [self.grid[r-2+i][c-2+i] for i in range(5)]
+                # budeme hodnotit pouze pokud tu není prázdno
+                if window.count(Board.CELL_EMPTY != 5):
+                    score += self.score_wnd5(window, player)
+                # diagonála /
+                window = [self.grid[r+2-i][c-2+i] for i in range(5)]
+                # budeme hodnotit pouze pokud tu není prázdno
+                if window.count(Board.CELL_EMPTY != 5):
+                    score += self.score_wnd5(window, player)
+        """
         return score
-
+            
     # vracíme WT_NONE, když je možné hrát dál
     # WT_WINNER, pokud je vítězem player
     # WT_LOSER, pokud je vítězem oponent
