@@ -10,12 +10,16 @@ class GUI:
         pygame.init()
         #: Počet FPS pro běh hry = 30
         self.fps: int = 30 # maximální počet FPS
+        #: Rozlišení displeje (hardware)
+        self.display_res: tuple[int, int] = (800, 600)
+        #: Rozlišení kreslící plochy
+        self.screen_res: tuple[int, int] = (800, 600)
         #: Kde to zobrazujeme.
-        self.display: pygame.Surface = pygame.display.set_mode((800, 600))
+        self.display: pygame.Surface = pygame.display.set_mode(self.display_res, pygame.RESIZABLE)
         #: Na co kreslíme.
-        self.screen: pygame.Surface = pygame.Surface((800, 600))
+        self.screen: pygame.Surface = pygame.Surface(self.screen_res)
         #: Manažer GUI rozhranní
-        self.manager: pygame_gui.UIManager = pygame_gui.UIManager((800, 600))
+        self.manager: pygame_gui.UIManager = pygame_gui.UIManager(self.screen_res)
         #: Hodiny pro sledování času hry
         self.clock: pygame.time.Clock = pygame.time.Clock()
         
@@ -44,13 +48,25 @@ class GUI:
         return self.clock.tick(self.fps)/1000.0
 
     def draw(self, delta: float) -> None:
-        """Vykreslení GUI, okna a update displeje"""
-        # vykreslíme GUI (podle dokumentace a testů musí být právě tady, aby fungovalo správně)
-        self.manager.update(delta)
+        """
+        Vykreslení GUI, okna a update displeje. Hybridní použití 
+        """
+        
+        # nejdřív na display dáme, co máme ve screenu
         self.display.blit(self.screen, (0, 0))
+        # pak to transformujeme
+        pygame.transform.scale(self.screen, self.display.get_size(), self.display)
+        """
+        # upravíme velikost okna menu dle rozlišení
+        self.manager.set_window_resolution(self.display.get_size())
+        new_ws : tuple[float,float] = (200*self.display.get_width()/self.screen.get_width(),
+                                       600*self.display.get_height()/self.screen.get_height())
+        self.ui_menu.set_dimensions(new_ws)
+        """
+        # a nakonec tam dohodíme pygame_gui
+        # při kreslení na screen to nefungovalo
+        self.manager.update(delta)
         self.manager.draw_ui(self.display)
-        # tohle s GUI nefunguje
-        #pygame.transform.scale(self.screen, self.display.get_size(), self.display)
         # provedeme update displeje
         pygame.display.update()
 

@@ -57,8 +57,8 @@ class Game:
         self.board: Board = Board(15, 15, 525, 525, 235, 35)
         #: Seznam hráčů s implicitním nastavením.
         self.players: Players = Players({
-            Players.PLAYER_1: Player(id=Players.PLAYER_1, name="Human", color=(255, 64, 64), shape=Player.SHAPE_SQUARE, type=Player.TYPE_HUMAN, ai_level=Player.AI_LVL_BALANCED), 
-            Players.PLAYER_2: Player(id=Players.PLAYER_2, name="Computer", color=(64, 64, 255), shape=Player.SHAPE_CIRCLE, type=Player.TYPE_AI, ai_level=Player.AI_LVL_BALANCED)
+            Players.PLAYER_1: Player(id=Players.PLAYER_1, name="Human", color=(255, 64, 64), shape=Player.SHAPE_CIRCLE, type=Player.TYPE_HUMAN, ai_level=Player.AI_LVL_BALANCED), 
+            Players.PLAYER_2: Player(id=Players.PLAYER_2, name="Computer", color=(64, 64, 255), shape=Player.SHAPE_CROSS, type=Player.TYPE_AI, ai_level=Player.AI_LVL_BALANCED)
             })
         # Pokud jsme nedokázali nahrát uložené nastavení
         if Players.load() == None:
@@ -157,6 +157,7 @@ class Game:
                 # křížkem nebo zmáčknutím q je konec
                 if event.type == pygame.QUIT or (event.type == pygame.KEYUP and event.key == pygame.K_q):
                     self.state = Game.STATE_QUIT
+                # escape znamená také konec
                 if event.type == pygame.KEYUP and event.key == pygame.K_ESCAPE:
                     if self.gui.message_box(message = "Are you sure?") == True:
                         self.state = Game.STATE_QUIT
@@ -203,13 +204,19 @@ class Game:
                             self.state = Game.STATE_QUIT
                 # ostatní GUI eventy
                 self.gui.manager.process_events(event)
+
                 # kliknutí myší hlavním tlačítkem
                 if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                     # tah hráče
                     for r in range (self.board.rows):
                         for c in range(self.board.cols):
                             # kliknul na hrací desku?
-                            if self.board.btns[r][c].collidepoint(pygame.mouse.get_pos()): # type: ignore
+                            mouse_pos = pygame.mouse.get_pos()
+                            colide_pos_x = mouse_pos[0]*self.gui.screen_res[0]/self.gui.display_res[0]
+                            colide_pos_y = mouse_pos[1]*self.gui.screen_res[1]/self.gui.display_res[1]
+                            colide_pos_x = mouse_pos[0]*self.gui.screen.get_width()/self.gui.display.get_width()
+                            colide_pos_y = mouse_pos[1]*self.gui.screen.get_height()/self.gui.display.get_height()
+                            if self.board.tiles[r][c].collidepoint(colide_pos_x, colide_pos_y): #type: ignore
                                 print("Klik na " + str(r) + ":" + str(c))
                                 # jestli je tu prázdno
                                 if self.board.grid[r][c] == Board.CELL_EMPTY:

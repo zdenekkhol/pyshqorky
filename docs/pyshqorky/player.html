@@ -49,6 +49,9 @@ class Player
 * oponent_id
 &#34;&#34;&#34;
 
+import pygame
+import math
+
 class Player:
     &#34;&#34;&#34; Třída, kde se bude držet info o jednom hráči.&#34;&#34;&#34;
 
@@ -59,10 +62,10 @@ class Player:
     
     #: Tvar hracího kamene: čtverec
     SHAPE_SQUARE = 0
-    #: Tvar hracího kamene: kruh
+    #: Tvar hracího kamene: kolečko
     SHAPE_CIRCLE = 1
-    #: Tvar hracího kamene: křížky a kolečka
-    SHAPE_SYMBOL = 2
+    #: Tvar hracího kamene: křížek
+    SHAPE_CROSS = 2
 
     #: Úroveň hry počítače: agresivní
     AI_LVL_AGRESSIVE = 0
@@ -94,7 +97,7 @@ class Player:
     #: Seznam hodnot typu hráče
     type_list = (&#34;Human&#34;, &#34;AI&#34;)
     #: Seznam hodnot tvaru kamene
-    shape_list = (&#34;Square&#34;, &#34;Circle&#34;, &#34;Symbol&#34;)
+    shape_list = (&#34;Square&#34;, &#34;Circle&#34;, &#34;Cross&#34;)
     #: Seznam hodnot úrovně hry počítače
     ai_level_list = (&#34;Agressive&#34;, &#34;Balanced&#34;, &#34;Defensive&#34;, &#34;Ultra defensive&#34;)
     #: Seznam hodnot tahů pro open game
@@ -124,7 +127,50 @@ class Player:
     def wins(self) -&gt; None:
         &#34;&#34;&#34;Tento hráč tuto hru vyhrál, přičteme mu to do počtu vítězství&#34;&#34;&#34;
         self.win_count += 1
-    
+
+    def draw(self, screen: pygame.Surface, r:int, c: int, x_offset: int, y_offset: int, sqsize: int, marked: bool = False) -&gt; None:
+        &#34;&#34;&#34;
+        Nakreslíme jeden kámen hráče dle tvaru, správnou barvou na správné místo anebo ho jen obtáhneme.
+        &#34;&#34;&#34;
+        shape_width=2
+        shape_color = (255, 255, 0)
+        if not marked:
+            if (self.shape == Player.SHAPE_CROSS):
+                shape_width = 0
+            else:
+                shape_width=math.floor(sqsize/5)
+            shape_color = self.color
+        # podíváme se, jaký má nastaven tvar kamene
+        match self.shape:
+            # a ten mu tam nakreslíme
+            case Player.SHAPE_SQUARE:
+                pygame.draw.rect(screen, shape_color, 
+                    pygame.Rect(sqsize*r+x_offset+(sqsize/8), sqsize*c+y_offset+(sqsize/8),
+                                sqsize-(sqsize/4), sqsize-(sqsize/4)),
+                                shape_width)
+            case Player.SHAPE_CIRCLE:
+                pygame.draw.circle(screen, shape_color, (sqsize*r+x_offset+(sqsize/2),
+                    sqsize*c+y_offset+(sqsize/2)),
+                    sqsize*0.45, shape_width)
+                                    
+            case Player.SHAPE_CROSS:
+                #ToDo
+                pygame.draw.polygon(screen, shape_color, (
+                    (sqsize*r+x_offset+(sqsize/8), sqsize*c+y_offset+(sqsize/4)),
+                    (sqsize*r+x_offset+(sqsize/4), sqsize*c+y_offset+(sqsize/8)),
+                    (sqsize*r+x_offset+(sqsize/2), sqsize*c+y_offset+(sqsize/2.5)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/4), sqsize*c+y_offset+(sqsize/8)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/8), sqsize*c+y_offset+(sqsize/4)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/2.5), sqsize*c+y_offset+(sqsize/2)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/8), sqsize*c+y_offset+sqsize-(sqsize/4)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/4), sqsize*c+y_offset+sqsize-(sqsize/8)),
+                    (sqsize*r+x_offset+(sqsize/2), sqsize*c+y_offset+sqsize-(sqsize/2.5)),
+                    (sqsize*r+x_offset+(sqsize/4), sqsize*c+y_offset+sqsize-(sqsize/8)),
+                    (sqsize*r+x_offset+(sqsize/8), sqsize*c+y_offset+sqsize-(sqsize/4)),
+                    (sqsize*r+x_offset+(sqsize/2.5), sqsize*c+y_offset+(sqsize/2))),
+                    shape_width
+                )
+            
 
     </code></pre>
 </details>
@@ -158,10 +204,10 @@ class Player:
     
     #: Tvar hracího kamene: čtverec
     SHAPE_SQUARE = 0
-    #: Tvar hracího kamene: kruh
+    #: Tvar hracího kamene: kolečko
     SHAPE_CIRCLE = 1
-    #: Tvar hracího kamene: křížky a kolečka
-    SHAPE_SYMBOL = 2
+    #: Tvar hracího kamene: křížek
+    SHAPE_CROSS = 2
 
     #: Úroveň hry počítače: agresivní
     AI_LVL_AGRESSIVE = 0
@@ -193,7 +239,7 @@ class Player:
     #: Seznam hodnot typu hráče
     type_list = (&#34;Human&#34;, &#34;AI&#34;)
     #: Seznam hodnot tvaru kamene
-    shape_list = (&#34;Square&#34;, &#34;Circle&#34;, &#34;Symbol&#34;)
+    shape_list = (&#34;Square&#34;, &#34;Circle&#34;, &#34;Cross&#34;)
     #: Seznam hodnot úrovně hry počítače
     ai_level_list = (&#34;Agressive&#34;, &#34;Balanced&#34;, &#34;Defensive&#34;, &#34;Ultra defensive&#34;)
     #: Seznam hodnot tahů pro open game
@@ -222,7 +268,50 @@ class Player:
     
     def wins(self) -&gt; None:
         &#34;&#34;&#34;Tento hráč tuto hru vyhrál, přičteme mu to do počtu vítězství&#34;&#34;&#34;
-        self.win_count += 1</code></pre>
+        self.win_count += 1
+
+    def draw(self, screen: pygame.Surface, r:int, c: int, x_offset: int, y_offset: int, sqsize: int, marked: bool = False) -&gt; None:
+        &#34;&#34;&#34;
+        Nakreslíme jeden kámen hráče dle tvaru, správnou barvou na správné místo anebo ho jen obtáhneme.
+        &#34;&#34;&#34;
+        shape_width=2
+        shape_color = (255, 255, 0)
+        if not marked:
+            if (self.shape == Player.SHAPE_CROSS):
+                shape_width = 0
+            else:
+                shape_width=math.floor(sqsize/5)
+            shape_color = self.color
+        # podíváme se, jaký má nastaven tvar kamene
+        match self.shape:
+            # a ten mu tam nakreslíme
+            case Player.SHAPE_SQUARE:
+                pygame.draw.rect(screen, shape_color, 
+                    pygame.Rect(sqsize*r+x_offset+(sqsize/8), sqsize*c+y_offset+(sqsize/8),
+                                sqsize-(sqsize/4), sqsize-(sqsize/4)),
+                                shape_width)
+            case Player.SHAPE_CIRCLE:
+                pygame.draw.circle(screen, shape_color, (sqsize*r+x_offset+(sqsize/2),
+                    sqsize*c+y_offset+(sqsize/2)),
+                    sqsize*0.45, shape_width)
+                                    
+            case Player.SHAPE_CROSS:
+                #ToDo
+                pygame.draw.polygon(screen, shape_color, (
+                    (sqsize*r+x_offset+(sqsize/8), sqsize*c+y_offset+(sqsize/4)),
+                    (sqsize*r+x_offset+(sqsize/4), sqsize*c+y_offset+(sqsize/8)),
+                    (sqsize*r+x_offset+(sqsize/2), sqsize*c+y_offset+(sqsize/2.5)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/4), sqsize*c+y_offset+(sqsize/8)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/8), sqsize*c+y_offset+(sqsize/4)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/2.5), sqsize*c+y_offset+(sqsize/2)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/8), sqsize*c+y_offset+sqsize-(sqsize/4)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/4), sqsize*c+y_offset+sqsize-(sqsize/8)),
+                    (sqsize*r+x_offset+(sqsize/2), sqsize*c+y_offset+sqsize-(sqsize/2.5)),
+                    (sqsize*r+x_offset+(sqsize/4), sqsize*c+y_offset+sqsize-(sqsize/8)),
+                    (sqsize*r+x_offset+(sqsize/8), sqsize*c+y_offset+sqsize-(sqsize/4)),
+                    (sqsize*r+x_offset+(sqsize/2.5), sqsize*c+y_offset+(sqsize/2))),
+                    shape_width
+                )</code></pre>
 </details>
 <h3>Class variables</h3>
 <dl>
@@ -263,15 +352,15 @@ Více v <code><a title="pyshqorky.board.Board.score_board" href="board.html#pysh
 </dd>
 <dt id="pyshqorky.player.Player.SHAPE_CIRCLE"><code class="name">var <span class="ident">SHAPE_CIRCLE</span></code></dt>
 <dd>
-<div class="desc"><p>Tvar hracího kamene: kruh</p></div>
+<div class="desc"><p>Tvar hracího kamene: kolečko</p></div>
+</dd>
+<dt id="pyshqorky.player.Player.SHAPE_CROSS"><code class="name">var <span class="ident">SHAPE_CROSS</span></code></dt>
+<dd>
+<div class="desc"><p>Tvar hracího kamene: křížek</p></div>
 </dd>
 <dt id="pyshqorky.player.Player.SHAPE_SQUARE"><code class="name">var <span class="ident">SHAPE_SQUARE</span></code></dt>
 <dd>
 <div class="desc"><p>Tvar hracího kamene: čtverec</p></div>
-</dd>
-<dt id="pyshqorky.player.Player.SHAPE_SYMBOL"><code class="name">var <span class="ident">SHAPE_SYMBOL</span></code></dt>
-<dd>
-<div class="desc"><p>Tvar hracího kamene: křížky a kolečka</p></div>
 </dd>
 <dt id="pyshqorky.player.Player.TYPE_AI"><code class="name">var <span class="ident">TYPE_AI</span></code></dt>
 <dd>
@@ -344,6 +433,59 @@ def oponent_id(self) -&gt; int:
 </dl>
 <h3>Methods</h3>
 <dl>
+<dt id="pyshqorky.player.Player.draw"><code class="name flex">
+<span>def <span class="ident">draw</span></span>(<span>self, screen: pygame.surface.Surface, r: int, c: int, x_offset: int, y_offset: int, sqsize: int, marked: bool = False) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Nakreslíme jeden kámen hráče dle tvaru, správnou barvou na správné místo anebo ho jen obtáhneme.</p></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">def draw(self, screen: pygame.Surface, r:int, c: int, x_offset: int, y_offset: int, sqsize: int, marked: bool = False) -&gt; None:
+    &#34;&#34;&#34;
+    Nakreslíme jeden kámen hráče dle tvaru, správnou barvou na správné místo anebo ho jen obtáhneme.
+    &#34;&#34;&#34;
+    shape_width=2
+    shape_color = (255, 255, 0)
+    if not marked:
+        if (self.shape == Player.SHAPE_CROSS):
+            shape_width = 0
+        else:
+            shape_width=math.floor(sqsize/5)
+        shape_color = self.color
+    # podíváme se, jaký má nastaven tvar kamene
+    match self.shape:
+        # a ten mu tam nakreslíme
+        case Player.SHAPE_SQUARE:
+            pygame.draw.rect(screen, shape_color, 
+                pygame.Rect(sqsize*r+x_offset+(sqsize/8), sqsize*c+y_offset+(sqsize/8),
+                            sqsize-(sqsize/4), sqsize-(sqsize/4)),
+                            shape_width)
+        case Player.SHAPE_CIRCLE:
+            pygame.draw.circle(screen, shape_color, (sqsize*r+x_offset+(sqsize/2),
+                sqsize*c+y_offset+(sqsize/2)),
+                sqsize*0.45, shape_width)
+                                
+        case Player.SHAPE_CROSS:
+            #ToDo
+            pygame.draw.polygon(screen, shape_color, (
+                (sqsize*r+x_offset+(sqsize/8), sqsize*c+y_offset+(sqsize/4)),
+                (sqsize*r+x_offset+(sqsize/4), sqsize*c+y_offset+(sqsize/8)),
+                (sqsize*r+x_offset+(sqsize/2), sqsize*c+y_offset+(sqsize/2.5)),
+                (sqsize*r+x_offset+sqsize-(sqsize/4), sqsize*c+y_offset+(sqsize/8)),
+                (sqsize*r+x_offset+sqsize-(sqsize/8), sqsize*c+y_offset+(sqsize/4)),
+                (sqsize*r+x_offset+sqsize-(sqsize/2.5), sqsize*c+y_offset+(sqsize/2)),
+                (sqsize*r+x_offset+sqsize-(sqsize/8), sqsize*c+y_offset+sqsize-(sqsize/4)),
+                (sqsize*r+x_offset+sqsize-(sqsize/4), sqsize*c+y_offset+sqsize-(sqsize/8)),
+                (sqsize*r+x_offset+(sqsize/2), sqsize*c+y_offset+sqsize-(sqsize/2.5)),
+                (sqsize*r+x_offset+(sqsize/4), sqsize*c+y_offset+sqsize-(sqsize/8)),
+                (sqsize*r+x_offset+(sqsize/8), sqsize*c+y_offset+sqsize-(sqsize/4)),
+                (sqsize*r+x_offset+(sqsize/2.5), sqsize*c+y_offset+(sqsize/2))),
+                shape_width
+            )</code></pre>
+</details>
+</dd>
 <dt id="pyshqorky.player.Player.wins"><code class="name flex">
 <span>def <span class="ident">wins</span></span>(<span>self) ‑> None</span>
 </code></dt>
@@ -388,13 +530,14 @@ def oponent_id(self) -&gt; int:
 <li><code><a title="pyshqorky.player.Player.AI_SCORE_OPONENT" href="#pyshqorky.player.Player.AI_SCORE_OPONENT">AI_SCORE_OPONENT</a></code></li>
 <li><code><a title="pyshqorky.player.Player.AI_VALUES" href="#pyshqorky.player.Player.AI_VALUES">AI_VALUES</a></code></li>
 <li><code><a title="pyshqorky.player.Player.SHAPE_CIRCLE" href="#pyshqorky.player.Player.SHAPE_CIRCLE">SHAPE_CIRCLE</a></code></li>
+<li><code><a title="pyshqorky.player.Player.SHAPE_CROSS" href="#pyshqorky.player.Player.SHAPE_CROSS">SHAPE_CROSS</a></code></li>
 <li><code><a title="pyshqorky.player.Player.SHAPE_SQUARE" href="#pyshqorky.player.Player.SHAPE_SQUARE">SHAPE_SQUARE</a></code></li>
-<li><code><a title="pyshqorky.player.Player.SHAPE_SYMBOL" href="#pyshqorky.player.Player.SHAPE_SYMBOL">SHAPE_SYMBOL</a></code></li>
 <li><code><a title="pyshqorky.player.Player.TYPE_AI" href="#pyshqorky.player.Player.TYPE_AI">TYPE_AI</a></code></li>
 <li><code><a title="pyshqorky.player.Player.TYPE_HUMAN" href="#pyshqorky.player.Player.TYPE_HUMAN">TYPE_HUMAN</a></code></li>
 <li><code><a title="pyshqorky.player.Player.ai_level" href="#pyshqorky.player.Player.ai_level">ai_level</a></code></li>
 <li><code><a title="pyshqorky.player.Player.ai_level_list" href="#pyshqorky.player.Player.ai_level_list">ai_level_list</a></code></li>
 <li><code><a title="pyshqorky.player.Player.color" href="#pyshqorky.player.Player.color">color</a></code></li>
+<li><code><a title="pyshqorky.player.Player.draw" href="#pyshqorky.player.Player.draw">draw</a></code></li>
 <li><code><a title="pyshqorky.player.Player.id" href="#pyshqorky.player.Player.id">id</a></code></li>
 <li><code><a title="pyshqorky.player.Player.name" href="#pyshqorky.player.Player.name">name</a></code></li>
 <li><code><a title="pyshqorky.player.Player.open_game_turns_list" href="#pyshqorky.player.Player.open_game_turns_list">open_game_turns_list</a></code></li>

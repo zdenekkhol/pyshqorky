@@ -8,6 +8,9 @@ class Player
 * oponent_id
 """
 
+import pygame
+import math
+
 class Player:
     """ Třída, kde se bude držet info o jednom hráči."""
 
@@ -18,10 +21,10 @@ class Player:
     
     #: Tvar hracího kamene: čtverec
     SHAPE_SQUARE = 0
-    #: Tvar hracího kamene: kruh
+    #: Tvar hracího kamene: kolečko
     SHAPE_CIRCLE = 1
-    #: Tvar hracího kamene: křížky a kolečka
-    SHAPE_SYMBOL = 2
+    #: Tvar hracího kamene: křížek
+    SHAPE_CROSS = 2
 
     #: Úroveň hry počítače: agresivní
     AI_LVL_AGRESSIVE = 0
@@ -53,7 +56,7 @@ class Player:
     #: Seznam hodnot typu hráče
     type_list = ("Human", "AI")
     #: Seznam hodnot tvaru kamene
-    shape_list = ("Square", "Circle", "Symbol")
+    shape_list = ("Square", "Circle", "Cross")
     #: Seznam hodnot úrovně hry počítače
     ai_level_list = ("Agressive", "Balanced", "Defensive", "Ultra defensive")
     #: Seznam hodnot tahů pro open game
@@ -83,7 +86,50 @@ class Player:
     def wins(self) -> None:
         """Tento hráč tuto hru vyhrál, přičteme mu to do počtu vítězství"""
         self.win_count += 1
-    
+
+    def draw(self, screen: pygame.Surface, r:int, c: int, x_offset: int, y_offset: int, sqsize: int, marked: bool = False) -> None:
+        """
+        Nakreslíme jeden kámen hráče dle tvaru, správnou barvou na správné místo anebo ho jen obtáhneme.
+        """
+        shape_width=2
+        shape_color = (255, 255, 0)
+        if not marked:
+            if (self.shape == Player.SHAPE_CROSS):
+                shape_width = 0
+            else:
+                shape_width=math.floor(sqsize/5)
+            shape_color = self.color
+        # podíváme se, jaký má nastaven tvar kamene
+        match self.shape:
+            # a ten mu tam nakreslíme
+            case Player.SHAPE_SQUARE:
+                pygame.draw.rect(screen, shape_color, 
+                    pygame.Rect(sqsize*r+x_offset+(sqsize/8), sqsize*c+y_offset+(sqsize/8),
+                                sqsize-(sqsize/4), sqsize-(sqsize/4)),
+                                shape_width)
+            case Player.SHAPE_CIRCLE:
+                pygame.draw.circle(screen, shape_color, (sqsize*r+x_offset+(sqsize/2),
+                    sqsize*c+y_offset+(sqsize/2)),
+                    sqsize*0.45, shape_width)
+                                    
+            case Player.SHAPE_CROSS:
+                #ToDo
+                pygame.draw.polygon(screen, shape_color, (
+                    (sqsize*r+x_offset+(sqsize/8), sqsize*c+y_offset+(sqsize/4)),
+                    (sqsize*r+x_offset+(sqsize/4), sqsize*c+y_offset+(sqsize/8)),
+                    (sqsize*r+x_offset+(sqsize/2), sqsize*c+y_offset+(sqsize/2.5)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/4), sqsize*c+y_offset+(sqsize/8)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/8), sqsize*c+y_offset+(sqsize/4)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/2.5), sqsize*c+y_offset+(sqsize/2)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/8), sqsize*c+y_offset+sqsize-(sqsize/4)),
+                    (sqsize*r+x_offset+sqsize-(sqsize/4), sqsize*c+y_offset+sqsize-(sqsize/8)),
+                    (sqsize*r+x_offset+(sqsize/2), sqsize*c+y_offset+sqsize-(sqsize/2.5)),
+                    (sqsize*r+x_offset+(sqsize/4), sqsize*c+y_offset+sqsize-(sqsize/8)),
+                    (sqsize*r+x_offset+(sqsize/8), sqsize*c+y_offset+sqsize-(sqsize/4)),
+                    (sqsize*r+x_offset+(sqsize/2.5), sqsize*c+y_offset+(sqsize/2))),
+                    shape_width
+                )
+            
 
     
 

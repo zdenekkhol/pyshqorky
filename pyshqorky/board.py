@@ -14,6 +14,7 @@ import pygame
 import random
 import math
 from pyshqorky.players import *
+from pyshqorky.tile import *
 
 class Board:
     """ Třída pro práci s herní deskou. Jsou zde informace o rozmístění kamenů na desce, vyhodnocení stavu desky a její vykreslování."""
@@ -48,48 +49,47 @@ class Board:
         #: Seznam seznamů (2D pole), kde je umístění kamenů na desce.
         self.grid = [[0 for col in range(self.cols)] for row in range(self.rows)]
         #: Seznam seznamů (2D pole), kde je info o hracích polích, které použijeme pro vyhodnocení interakce s hráčem.
-        self.btns = [[pygame.Rect for col in range(self.cols)] for row in range(self.rows)]
+        self.tiles = [[Tile for col in range(self.cols)] for row in range(self.rows)]
 
     def draw(self, screen, players: Players | None = None, mark_coords: list[tuple[int, int]] | None = None) -> None:
         """
         Vykreslení herní plochy. Nejdřív nakreslíme pole `pygame.Rect`. Každý v poli o velikosti o jedna menší, než velikost `pyshqorky.board.Board.sqsize`. To pro zobrazení mřížky.
         Potom, pokud jsme dostali v parametru i seznam hráčů, nakreslíme jejich kameny na každé pole, kde se nacházejí.
+        Nakonec nakreslíme zvýraznění, pokud je máme.
         """
         # vykreslení herní plochy
         for r in range (self.rows):
             for c in range(self.cols):
                 # Vykreslení jednoho herního pole
-                self.btns[r][c] = pygame.draw.rect(screen, (0x40,0x40,0x40), pygame.Rect(self.sqsize*r+self.x_offset, # type: ignore
+                self.tiles[r][c] = Tile(pygame.draw.rect(screen, (0x40,0x40,0x40), pygame.Rect(self.sqsize*r+self.x_offset, # type: ignore
                                                                                          self.sqsize*c+self.y_offset,
-                                                                                         self.sqsize-1, self.sqsize-1))
+                                                                                         self.sqsize-1, self.sqsize-1)),
+                                                                                         r, c)
                 # Pokud jsme dostali i seznam hráčů
                 if players is not None:
                     # projedem oba
                     for id, pl in players.items():
                         # a pokud je tenhle na tomto poli
                         if self.grid[r][c] == pl.id:
-                            # podíváme se, jaký má nastaven tvar kamene
-                            match pl.shape:
-                                # a ten mu tam nakreslíme
-                                case Player.SHAPE_SQUARE:
-                                    pygame.draw.rect(screen, pl.color, pygame.Rect(self.sqsize*r+self.x_offset+(self.sqsize/8),
-                                                                                    self.sqsize*c+self.y_offset+(self.sqsize/8),
-                                                                                    self.sqsize-(self.sqsize/4),
-                                                                                    self.sqsize-(self.sqsize/4)))
-                                case Player.SHAPE_CIRCLE:
-                                    pygame.draw.circle(screen, pl.color, (self.sqsize*r+self.x_offset+(self.sqsize/2),
-                                                                        self.sqsize*c+self.y_offset+(self.sqsize/2)),
-                                                                        self.sqsize*0.45)
-                                case Player.SHAPE_SYMBOL:
-                                    #ToDo
-                                    pass
+                            # tak ho nakreslíme
+                            pl.draw(screen, r, c, self.x_offset, self.y_offset, self.sqsize)
         # nakonec vykreslení zvýraznění, pokud je přítomno
         if mark_coords is not None:
+            # pro každé pole k zvýraznění
             for (r, c) in mark_coords:
-                pygame.draw.circle(screen, (255, 255, 0), (self.sqsize*r+self.x_offset+(self.sqsize/2),
+                # pokud máme hráče 
+                if players is not None:
+                    # projedem oba
+                    for id, pl in players.items():
+                        # a pokud je tenhle na tomto poli
+                        if self.grid[r][c] == pl.id:
+                            # tak ho obtáhneme
+                            pl.draw(screen, r, c, self.x_offset, self.y_offset, self.sqsize, True)
+                # jinak uděláme pro zvýraznění tečku uprostřed
+                else:
+                    pygame.draw.circle(screen, (255, 255, 0), (self.sqsize*r+self.x_offset+(self.sqsize/2),
                                                     self.sqsize*c+self.y_offset+(self.sqsize/2)),
                                                     self.sqsize*0.15)
-
 
     def score_wnd5(self, window: list, player: Player) -> int:
         """

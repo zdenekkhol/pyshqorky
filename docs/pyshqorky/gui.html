@@ -38,12 +38,16 @@ class GUI:
         pygame.init()
         #: Počet FPS pro běh hry = 30
         self.fps: int = 30 # maximální počet FPS
+        #: Rozlišení displeje (hardware)
+        self.display_res: tuple[int, int] = (800, 600)
+        #: Rozlišení kreslící plochy
+        self.screen_res: tuple[int, int] = (800, 600)
         #: Kde to zobrazujeme.
-        self.display: pygame.Surface = pygame.display.set_mode((800, 600))
+        self.display: pygame.Surface = pygame.display.set_mode(self.display_res, pygame.RESIZABLE)
         #: Na co kreslíme.
-        self.screen: pygame.Surface = pygame.Surface((800, 600))
+        self.screen: pygame.Surface = pygame.Surface(self.screen_res)
         #: Manažer GUI rozhranní
-        self.manager: pygame_gui.UIManager = pygame_gui.UIManager((800, 600))
+        self.manager: pygame_gui.UIManager = pygame_gui.UIManager(self.screen_res)
         #: Hodiny pro sledování času hry
         self.clock: pygame.time.Clock = pygame.time.Clock()
         
@@ -72,13 +76,25 @@ class GUI:
         return self.clock.tick(self.fps)/1000.0
 
     def draw(self, delta: float) -&gt; None:
-        &#34;&#34;&#34;Vykreslení GUI, okna a update displeje&#34;&#34;&#34;
-        # vykreslíme GUI (podle dokumentace a testů musí být právě tady, aby fungovalo správně)
-        self.manager.update(delta)
+        &#34;&#34;&#34;
+        Vykreslení GUI, okna a update displeje. Hybridní použití 
+        &#34;&#34;&#34;
+        
+        # nejdřív na display dáme, co máme ve screenu
         self.display.blit(self.screen, (0, 0))
+        # pak to transformujeme
+        pygame.transform.scale(self.screen, self.display.get_size(), self.display)
+        &#34;&#34;&#34;
+        # upravíme velikost okna menu dle rozlišení
+        self.manager.set_window_resolution(self.display.get_size())
+        new_ws : tuple[float,float] = (200*self.display.get_width()/self.screen.get_width(),
+                                       600*self.display.get_height()/self.screen.get_height())
+        self.ui_menu.set_dimensions(new_ws)
+        &#34;&#34;&#34;
+        # a nakonec tam dohodíme pygame_gui
+        # při kreslení na screen to nefungovalo
+        self.manager.update(delta)
         self.manager.draw_ui(self.display)
-        # tohle s GUI nefunguje
-        #pygame.transform.scale(self.screen, self.display.get_size(), self.display)
         # provedeme update displeje
         pygame.display.update()
 
@@ -247,12 +263,16 @@ class GUI:
         pygame.init()
         #: Počet FPS pro běh hry = 30
         self.fps: int = 30 # maximální počet FPS
+        #: Rozlišení displeje (hardware)
+        self.display_res: tuple[int, int] = (800, 600)
+        #: Rozlišení kreslící plochy
+        self.screen_res: tuple[int, int] = (800, 600)
         #: Kde to zobrazujeme.
-        self.display: pygame.Surface = pygame.display.set_mode((800, 600))
+        self.display: pygame.Surface = pygame.display.set_mode(self.display_res, pygame.RESIZABLE)
         #: Na co kreslíme.
-        self.screen: pygame.Surface = pygame.Surface((800, 600))
+        self.screen: pygame.Surface = pygame.Surface(self.screen_res)
         #: Manažer GUI rozhranní
-        self.manager: pygame_gui.UIManager = pygame_gui.UIManager((800, 600))
+        self.manager: pygame_gui.UIManager = pygame_gui.UIManager(self.screen_res)
         #: Hodiny pro sledování času hry
         self.clock: pygame.time.Clock = pygame.time.Clock()
         
@@ -281,13 +301,25 @@ class GUI:
         return self.clock.tick(self.fps)/1000.0
 
     def draw(self, delta: float) -&gt; None:
-        &#34;&#34;&#34;Vykreslení GUI, okna a update displeje&#34;&#34;&#34;
-        # vykreslíme GUI (podle dokumentace a testů musí být právě tady, aby fungovalo správně)
-        self.manager.update(delta)
+        &#34;&#34;&#34;
+        Vykreslení GUI, okna a update displeje. Hybridní použití 
+        &#34;&#34;&#34;
+        
+        # nejdřív na display dáme, co máme ve screenu
         self.display.blit(self.screen, (0, 0))
+        # pak to transformujeme
+        pygame.transform.scale(self.screen, self.display.get_size(), self.display)
+        &#34;&#34;&#34;
+        # upravíme velikost okna menu dle rozlišení
+        self.manager.set_window_resolution(self.display.get_size())
+        new_ws : tuple[float,float] = (200*self.display.get_width()/self.screen.get_width(),
+                                       600*self.display.get_height()/self.screen.get_height())
+        self.ui_menu.set_dimensions(new_ws)
+        &#34;&#34;&#34;
+        # a nakonec tam dohodíme pygame_gui
+        # při kreslení na screen to nefungovalo
+        self.manager.update(delta)
         self.manager.draw_ui(self.display)
-        # tohle s GUI nefunguje
-        #pygame.transform.scale(self.screen, self.display.get_size(), self.display)
         # provedeme update displeje
         pygame.display.update()
 
@@ -455,6 +487,10 @@ class GUI:
 <dd>
 <div class="desc"><p>Kde to zobrazujeme.</p></div>
 </dd>
+<dt id="pyshqorky.gui.GUI.display_res"><code class="name">var <span class="ident">display_res</span></code></dt>
+<dd>
+<div class="desc"><p>Rozlišení displeje (hardware)</p></div>
+</dd>
 <dt id="pyshqorky.gui.GUI.fps"><code class="name">var <span class="ident">fps</span></code></dt>
 <dd>
 <div class="desc"><p>Počet FPS pro běh hry = 30</p></div>
@@ -471,6 +507,10 @@ class GUI:
 <dd>
 <div class="desc"><p>Na co kreslíme.</p></div>
 </dd>
+<dt id="pyshqorky.gui.GUI.screen_res"><code class="name">var <span class="ident">screen_res</span></code></dt>
+<dd>
+<div class="desc"><p>Rozlišení kreslící plochy</p></div>
+</dd>
 <dt id="pyshqorky.gui.GUI.ui_menu"><code class="name">var <span class="ident">ui_menu</span></code></dt>
 <dd>
 <div class="desc"><p>Okno hlavního menu</p></div>
@@ -482,19 +522,31 @@ class GUI:
 <span>def <span class="ident">draw</span></span>(<span>self, delta: float) ‑> None</span>
 </code></dt>
 <dd>
-<div class="desc"><p>Vykreslení GUI, okna a update displeje</p></div>
+<div class="desc"><p>Vykreslení GUI, okna a update displeje. Hybridní použití</p></div>
 <details class="source">
 <summary>
 <span>Expand source code</span>
 </summary>
 <pre><code class="python">def draw(self, delta: float) -&gt; None:
-    &#34;&#34;&#34;Vykreslení GUI, okna a update displeje&#34;&#34;&#34;
-    # vykreslíme GUI (podle dokumentace a testů musí být právě tady, aby fungovalo správně)
-    self.manager.update(delta)
+    &#34;&#34;&#34;
+    Vykreslení GUI, okna a update displeje. Hybridní použití 
+    &#34;&#34;&#34;
+    
+    # nejdřív na display dáme, co máme ve screenu
     self.display.blit(self.screen, (0, 0))
+    # pak to transformujeme
+    pygame.transform.scale(self.screen, self.display.get_size(), self.display)
+    &#34;&#34;&#34;
+    # upravíme velikost okna menu dle rozlišení
+    self.manager.set_window_resolution(self.display.get_size())
+    new_ws : tuple[float,float] = (200*self.display.get_width()/self.screen.get_width(),
+                                   600*self.display.get_height()/self.screen.get_height())
+    self.ui_menu.set_dimensions(new_ws)
+    &#34;&#34;&#34;
+    # a nakonec tam dohodíme pygame_gui
+    # při kreslení na screen to nefungovalo
+    self.manager.update(delta)
     self.manager.draw_ui(self.display)
-    # tohle s GUI nefunguje
-    #pygame.transform.scale(self.screen, self.display.get_size(), self.display)
     # provedeme update displeje
     pygame.display.update()</code></pre>
 </details>
@@ -699,6 +751,7 @@ class GUI:
 <li><code><a title="pyshqorky.gui.GUI.btn_settings" href="#pyshqorky.gui.GUI.btn_settings">btn_settings</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.clock" href="#pyshqorky.gui.GUI.clock">clock</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.display" href="#pyshqorky.gui.GUI.display">display</a></code></li>
+<li><code><a title="pyshqorky.gui.GUI.display_res" href="#pyshqorky.gui.GUI.display_res">display_res</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.draw" href="#pyshqorky.gui.GUI.draw">draw</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.fps" href="#pyshqorky.gui.GUI.fps">fps</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.lbl_score" href="#pyshqorky.gui.GUI.lbl_score">lbl_score</a></code></li>
@@ -706,6 +759,7 @@ class GUI:
 <li><code><a title="pyshqorky.gui.GUI.menu_settings" href="#pyshqorky.gui.GUI.menu_settings">menu_settings</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.message_box" href="#pyshqorky.gui.GUI.message_box">message_box</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.screen" href="#pyshqorky.gui.GUI.screen">screen</a></code></li>
+<li><code><a title="pyshqorky.gui.GUI.screen_res" href="#pyshqorky.gui.GUI.screen_res">screen_res</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.time_delta" href="#pyshqorky.gui.GUI.time_delta">time_delta</a></code></li>
 <li><code><a title="pyshqorky.gui.GUI.ui_menu" href="#pyshqorky.gui.GUI.ui_menu">ui_menu</a></code></li>
 </ul>
