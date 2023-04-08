@@ -14,7 +14,6 @@ import pygame
 import random
 import math
 from pyshqorky.players import *
-from pyshqorky.tile import *
 
 class Board:
     """ Třída pro práci s herní deskou. Jsou zde informace o rozmístění kamenů na desce, vyhodnocení stavu desky a její vykreslování."""
@@ -31,7 +30,7 @@ class Board:
     #: Vítězství nebo remíza? Je to remíza.
     WT_TIE = 3
 
-    def __init__(self, rows, cols, width, height, x_offset, y_offset) -> None:
+    def __init__(self, rows: int, cols: int, width: int, height: int, x_offset: int, y_offset: int) -> None:
         #: Počet řádků.
         self.rows = rows
         #: Počet sloupců.
@@ -49,7 +48,7 @@ class Board:
         #: Seznam seznamů (2D pole), kde je umístění kamenů na desce.
         self.grid = [[0 for col in range(self.cols)] for row in range(self.rows)]
         #: Seznam seznamů (2D pole), kde je info o hracích polích, které použijeme pro vyhodnocení interakce s hráčem.
-        self.tiles = [[Tile for col in range(self.cols)] for row in range(self.rows)]
+        self.tiles = [[pygame.Rect for col in range(self.cols)] for row in range(self.rows)]
 
     def draw(self, screen, players: Players | None = None, mark_coords: list[tuple[int, int]] | None = None) -> None:
         """
@@ -61,10 +60,8 @@ class Board:
         for r in range (self.rows):
             for c in range(self.cols):
                 # Vykreslení jednoho herního pole
-                self.tiles[r][c] = Tile(pygame.draw.rect(screen, (0x40,0x40,0x40), pygame.Rect(self.sqsize*r+self.x_offset, # type: ignore
-                                                                                         self.sqsize*c+self.y_offset,
-                                                                                         self.sqsize-1, self.sqsize-1)),
-                                                                                         r, c)
+                self.tiles[r][c] = pygame.draw.rect(screen, (0x40,0x40,0x40), #type: ignore
+                    pygame.Rect(self.sqsize*r+self.x_offset, self.sqsize*c+self.y_offset, self.sqsize-1, self.sqsize-1))
                 # Pokud jsme dostali i seznam hráčů
                 if players is not None:
                     # projedem oba
